@@ -77,7 +77,7 @@ public class AdminUtils {
                                 DataObject n = it2.next();
                                 vm.addParam(n.getString("id"), n.get("value"));
                             }
-                            ret.append(id+"="+vm+";\n");
+                            ret.append("var "+id+"="+vm+";\n");
                         }    
                         ds_cache.addSubObject("ValueMap").addParam("text", ret.toString()).addParam("backend", true).addParam("frontend", true);
                         
@@ -234,6 +234,43 @@ public class AdminUtils {
                         }
                         
                         {
+                            ds=eng.getDataSource("DataSourceIndex");                        
+                            it=ds.find();
+                            while (it.hasNext()) {
+                                DataObject obj = it.next();
+                                try
+                                {
+                                    String dataSource=obj.getString("ds");
+                                    String name=obj.getString("name");
+                                    String dsn=dataSource.substring(dataSource.lastIndexOf(":")+1);
+
+                                    ret=new StringBuilder();
+                                    ret.append("eng.dataSourceIndexes[\"swbf_"+dsn+"_"+name+"\"] = {"+"\n");
+                                    ret.append("    dataSource: \""+dsn+"\","+"\n");
+                                    ret.append("    scriptEngine: \"/admin/ds/datasources.js\","+"\n");
+
+                                    ret.append("    index: {");                                
+                                    DataObject query=new DataObject();
+                                    query.addSubObject("data").addParam("dsindex", obj.getId());
+                                    DataObjectIterator it2=eng.getDataSource("DataSourceIndexFields").find(query);
+                                    //System.out.println("size:"+it2.size()+":"+it2.total());
+                                    while (it2.hasNext()) {
+                                        DataObject fobj = it2.next();
+                                        ret.append(fobj.getString("prop").substring(dsn.length()+1));
+                                        ret.append(":");
+                                        ret.append(fobj.getString("type"));
+                                        if(it2.hasNext())ret.append(", ");
+                                    }                                
+                                    ret.append("}"+"\n");
+
+                                    ret.append("};"+"\n");
+                                    ds_cache.addSubObject("DataSourceIndex_"+obj.getString("name")).addParam("text", ret.toString()).addParam("backend", true).addParam("frontend", false);     
+                                }catch(Exception e)
+                                {
+                                    e.printStackTrace();
+                                }
+                            }                           
+                            
                             ds=eng.getDataSource("GlobalScript");                        
                             DataObject query=new DataObject();
                             query.addSubList("sortBy").add("order");

@@ -2,14 +2,14 @@
     Document   : index
     Created on : 15-abr-2017, 12:26:32
     Author     : javiersolis
---%>
+--%><%@page contentType="text/html" pageEncoding="UTF-8"%><%@page import="org.semanticwb.datamanager.utils.TokenGenerator"%>
 <%@page import="org.semanticwb.datamanager.*"%><%
     String contextPath = request.getContextPath();
     SWBScriptEngine eng=DataMgr.initPlatform("/WEB-INF/global.js",session);
     String email=request.getParameter("email");
-    String password=request.getParameter("password");
-    //System.out.println(email+" "+password);
-
+    String password=request.getParameter("password");    
+    boolean remember=request.getParameter("remember")!=null;
+    
     String errorMgs="";
     
     String token=request.getParameter("token");
@@ -44,15 +44,46 @@
         //System.out.println("ret"+ret);
         if(!rdata.isEmpty())
         {
-            session.setAttribute("_USER_", rdata.get(0));
+            DataObject user=rdata.getDataObject(0);
+            session.setAttribute("_USER_", user);
             String path=(String)request.getAttribute("servletPath");
             if(path==null || path.equals("/login"))path="/";
+            
+            if(remember)
+            {
+                Cookie c=new Cookie("swbf",TokenGenerator.nextTokenByUserId(user.getNumId()));
+                c.setMaxAge(60*60*24*365);
+                response.addCookie(c);
+            }             
+            
             response.sendRedirect(contextPath+path);
             return;
         }else
         {
             errorMgs="Error al validar credenciales...";
         }
+    }else
+    {
+/*        
+        Cookie cooks[]=request.getCookies();
+        if(cooks!=null)
+        {
+            for(int i=0;i<cooks.length;i++)
+            {
+                if(cooks[i].getName().equals("swbf"))
+                {
+                    SWBDataSource ds=eng.getDataSource("User");  
+                    String uid=TokenGenerator.getUserIdFromToken(cooks[i].getValue());
+                    DataObject user=ds.getObjectByNumId(uid);
+                    session.setAttribute("_USER_", user);
+                    String path=(String)request.getAttribute("servletPath");
+                    if(path==null || path.equals("/login"))path="/";                    
+                    response.sendRedirect(contextPath+path);
+                    return;
+                }
+            }
+        }  
+*/
     }    
 %>
 <html>
@@ -67,7 +98,7 @@
     <!-- Theme style -->
     <link href="<%=contextPath%>/static/admin/dist/css/AdminLTE.min.css" rel="stylesheet" type="text/css" />
     <!-- iCheck -->
-    <link href="<%=contextPath%>/static/admin/plugins/iCheck/flat/blue.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="<%=contextPath%>/static/admin/plugins/iCheck/square/blue.css">    
     <link href="<%=contextPath%>/admin/css/login.css" rel="stylesheet" type="text/css" />
   </head>
   <body class="login-page">
@@ -76,18 +107,25 @@
           <a href="<%=contextPath%>/"><img src="<%=contextPath%>/admin/img/logo.png" width="320" alt="<%=eng.getAppName()%>"></a>
       </div><!-- /.login-logo -->
       <div class="login-box-body">
-        <p class="login-box-msg">Introduce tus credenciales para comenzar tu sesión</p>
+        <p class="login-box-msg">Introduce tus credenciales para comenzar tu sesiÃ³n</p>
         <%if(errorMgs.length()>0){%><p class="login-box-msg"><code><%=errorMgs%></code></p><%}%>
         <form action="" method="post" target="_top">
           <div class="form-group has-feedback">
-            <input type="email" name="email" class="form-control" placeholder="Correo Electrónico" required/>
+            <input type="email" name="email" class="form-control" placeholder="Correo ElectrÃ³nico" required/>
             <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
           </div>
           <div class="form-group has-feedback">
-            <input type="password" name="password" class="form-control" placeholder="Contraseña" required/>
+            <input type="password" name="password" class="form-control" placeholder="ContraseÃ±a" required/>
             <span class="glyphicon glyphicon-lock form-control-feedback"></span>
           </div>
           <div class="row">
+            <div class="col-xs-8">    
+              <div class="checkbox icheck">
+                <label>
+                  <input type="checkbox" name="remember"> Recordarme
+                </label>
+              </div>                        
+            </div><!-- /.col -->              
             <div class="col-xs-4">
               <button type="submit" class="btn btn-primary btn-block btn-flat">Entrar</button>
             </div><!-- /.col -->
@@ -100,7 +138,7 @@
           <a href="#" class="btn btn-block btn-social btn-google-plus btn-flat"><i class="fa fa-google-plus"></i> Sign in using Google+</a>
         </div><!-- /.social-auth-links -->
 
-        <a href="<%=contextPath%>/passwordRecovery">Olvidé mi contraseña</a><br>
+        <a href="<%=contextPath%>/passwordRecovery">OlvidÃ© mi contraseÃ±a</a><br>
         <a href="<%=contextPath%>/register" class="text-center">Registrarme como nuevo usuario</a>
 
       </div><!-- /.login-box-body -->

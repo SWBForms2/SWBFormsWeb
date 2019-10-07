@@ -90,7 +90,7 @@ var eng = {
         grid.form=form;
     },    
             
-    linkForm:function(fromForm, toForm, prop)  //Metodo Interno
+    linkForm:function(fromForm, toForm, link)  //Metodo Interno
     {
         if(!fromForm.linkToForms)
         {
@@ -102,11 +102,11 @@ var eng = {
         }        
         fromForm.linkToForms.push({
             form:toForm, 
-            prop:prop
+            link:link
         });
         toForm.linkFromForms.push({
             form:fromForm, 
-            prop:prop
+            link:link
         });
     },    
             
@@ -308,7 +308,7 @@ var eng = {
                 for (var i = 0; i<form.linkFromForms.length; i++)
                 {
                     var from=form.linkFromForms[i];  
-                    from.form.setValue(from.prop,form.getValue("_id"));
+                    from.form.setValue(from.link.name,form.getValue(from.link.valueField?from.link.valueField:"_id"));
                 }
             }
             
@@ -466,7 +466,10 @@ var eng = {
                 {
                     if(ds==null)eng.processFields(link.fields);
                     var sform=isc.DynamicForm.create({
-                        numCols: link.numCols?link.numCols:6,
+                        numCols: link.numCols?link.numCols:2,
+                        width: link.width?link.width:"100%",
+                        left: link.left?link.left:"-8px",
+                        colWidths: link.colWidths?link.colWidths:[250, "*"],
                         cellPadding: 5,
                         titleAlign : "right",
                         titleOrientation:link.titleOrientation?link.titleOrientation:"left",
@@ -496,7 +499,7 @@ var eng = {
                     });              
                     pane.addMember(spane);
                     
-                    eng.linkForm(form,sform,link.name);
+                    eng.linkForm(form,sform,link);
                     
                     eng.addLinks(ds?ds.links:undefined,tabs,tab,spane,sform);
                 }else if(link.stype==="tab")
@@ -529,7 +532,7 @@ var eng = {
                     };
                     
                     tabs.addTab(stab);
-                    eng.linkForm(form,sform,link.name);
+                    eng.linkForm(form,sform,link);
                     eng.addLinks(ds?ds.links:undefined,tabs,stab,spane,sform);
                 }
             }                  
@@ -658,10 +661,10 @@ var eng = {
             {
                 var to=form.linkToForms[i];
 
-                val=form.getValue(to.prop);
-                if(val)eng.fetchForm(to.form,{
-                    _id:val
-                });
+                val=form.getValue(to.link.name);
+                var arr={};
+                arr[to.link.valueField?to.link.valueField:"_id"]=val;
+                if(val)eng.fetchForm(to.form,arr);
             }               
         }
     },
@@ -690,11 +693,10 @@ var eng = {
                 for (var i = 0; i<form.linkToForms.length; i++) 
                 {
                     var to=form.linkToForms[i];
-
-                    val=form.getValue(to.prop);
-                    if(val)eng.fetchForm(to.form,{
-                        _id:val
-                    });
+                    val=form.getValue(to.link.name);
+                    var arr={};
+                    arr[to.link.valueField?to.link.valueField:"_id"]=val;
+                    if(val)eng.fetchForm(to.form,arr);
                 }               
             }
             if(callback)callback();
@@ -1189,7 +1191,7 @@ var eng = {
         var formBase = eng.utils.cloneObject(base);
 
         if (formBase.numCols===undefined)
-            formBase.numCols = 6;        
+            formBase.numCols = 2;        
         //colWidths: [60, "*"],     
         if (formBase.titleOrientation===undefined)
             formBase.titleOrientation = "left";        
@@ -2074,25 +2076,7 @@ var eng = {
             }
         }
         return ret;
-    },   
-    
-    /**
-     * Get the user context data
-     * @returns context data
-     */
-    getContextData: function(key)
-    {
-        var data={};
-        data.operationType="contextData";
-        data.dataKey=key;
-
-        var res=eng.utils.getSynchData(eng.contextPath + eng.dataSourceServlet+"?dssp="+eng.dataSourceScriptPath,JSON.stringify(data));
-        if(res.status==200)
-        {
-            var ret=JSON.parse(res.response).response; 
-            return ret;
-        }    
-    },               
+    },                     
     
     /**
      * Login to the platform
@@ -2193,6 +2177,7 @@ var eng = {
     {
         var cache=true;
         var _isc=true;
+        var _isc_load=true;
         var _isc_calendar=false;
         var _isc_richTextEditor=true;
 
@@ -2223,6 +2208,7 @@ var eng = {
             if(conf.engId !== undefined)eng.id=conf.engId;
             if(conf.cache !== undefined)cache=conf.cache;
             if(conf.isc !== undefined)_isc=conf.isc;
+            if(conf.isc_load !== undefined)_isc_load=conf.isc_load;
             if(conf.isc_calendar !== undefined)_isc_calendar=conf.isc_calendar;
             if(conf.isc_richTextEditor !== undefined)_isc_richTextEditor=conf.isc_richTextEditor;
         }
@@ -2245,17 +2231,20 @@ var eng = {
             
             if(_isc)
             {
-                eng.utils.loadJS(isomorphicDir+"system/modules/ISC_Core.js",false,cache,true,eng.staticVersion);
-                eng.utils.loadJS(isomorphicDir+"system/modules/ISC_Foundation.js",false,cache,true,eng.staticVersion);
-                eng.utils.loadJS(isomorphicDir+"system/modules/ISC_Containers.js",false,cache,true,eng.staticVersion);
-                eng.utils.loadJS(isomorphicDir+"system/modules/ISC_Grids.js",false,cache,true,eng.staticVersion);
-                eng.utils.loadJS(isomorphicDir+"system/modules/ISC_Forms.js",false,cache,true,eng.staticVersion);
-                eng.utils.loadJS(isomorphicDir+"system/modules/ISC_DataBinding.js",false,cache,true,eng.staticVersion);
-                if(_isc_richTextEditor)eng.utils.loadJS(isomorphicDir+"system/modules/ISC_RichTextEditor.js",false,cache,true,eng.staticVersion);            
-                if(_isc_calendar)eng.utils.loadJS(isomorphicDir+"system/modules/ISC_Calendar.js",false,cache,true,eng.staticVersion);
-                eng.utils.loadJS(isomorphicDir+"skins/Tahoe/load_skin.js",false,cache,true,eng.staticVersion);
-                eng.utils.loadJS(isomorphicDir+"locales/frameworkMessages_es.properties",false,cache,true,eng.staticVersion);
-                eng.utils.loadJS(eng.contextPath + "/platform/plupload/js/plupload.full.min.js",false,cache,true, eng.staticVersion);
+                if(_isc_load)
+                {
+                    eng.utils.loadJS(isomorphicDir+"system/modules/ISC_Core.js",false,cache,true,eng.staticVersion);
+                    eng.utils.loadJS(isomorphicDir+"system/modules/ISC_Foundation.js",false,cache,true,eng.staticVersion);
+                    eng.utils.loadJS(isomorphicDir+"system/modules/ISC_Containers.js",false,cache,true,eng.staticVersion);
+                    eng.utils.loadJS(isomorphicDir+"system/modules/ISC_Grids.js",false,cache,true,eng.staticVersion);
+                    eng.utils.loadJS(isomorphicDir+"system/modules/ISC_Forms.js",false,cache,true,eng.staticVersion);
+                    eng.utils.loadJS(isomorphicDir+"system/modules/ISC_DataBinding.js",false,cache,true,eng.staticVersion);
+                    if(_isc_richTextEditor)eng.utils.loadJS(isomorphicDir+"system/modules/ISC_RichTextEditor.js",false,cache,true,eng.staticVersion);            
+                    if(_isc_calendar)eng.utils.loadJS(isomorphicDir+"system/modules/ISC_Calendar.js",false,cache,true,eng.staticVersion);
+                    eng.utils.loadJS(isomorphicDir+"skins/Tahoe/load_skin.js",false,cache,true,eng.staticVersion);
+                    eng.utils.loadJS(isomorphicDir+"locales/frameworkMessages_es.properties",false,cache,true,eng.staticVersion);
+                    eng.utils.loadJS(eng.contextPath + "/platform/plupload/js/plupload.full.min.js",false,cache,true, eng.staticVersion);
+                }
                         
                 isc.DateItem.DEFAULT_START_DATE.setYear(1900);
             

@@ -1,4 +1,7 @@
 //Add yours validators here
+eng.validators["unique"] = {type: "isUnique", errorMessage: "El valor del campo debe de ser único"};
+eng.validators["id"] = {type: "regexp", expression: "^([a-zA-Z0-9_+])+$", errorMessage: "Identificador no valido"};
+eng.validators["email"] = {type: "regexp", expression: "^([a-zA-Z0-9_.\\-+])+@(([a-zA-Z0-9\\-])+\\.)+[a-zA-Z0-9]{2,4}$", errorMessage: "Correo electrónico invalido"};
 eng.validators["curp"] = {type: "regexp", expression: "^([A-Z][AEIOUX][A-Z]{2}\\d{2}(?:0[1-9]|1[0-2])(?:0[1-9][12]\\d|3[01])[HM](?:AS|B[CS]|C[CLMSH]|D[FG]|G[TR]|HG|JC|M[CNS]|N[ETL]|OC|PL|Q[TR]|S[PLR]|T[CSL]|VZ|YN|ZS)[B-DF-HJ-NP-TV-Z]{3}[A-Z\\d])(\\d)$", errorMessage: "CURP invalida"};
 eng.validators["curpSize"] = {type: "lengthRange", min: 18, max: 18, errorMessage: "El tamaño del CURP es de 18 caracteres"};
 eng.validators["rfc"] = {type: "regexp", expression: "^([A-Z,Ñ,&]{3,4}([0-9]{2})(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[0-1])[A-Z|\\d]{3})$", errorMessage: "RFC invalido"};

@@ -53,6 +53,9 @@
     if(id.equals("admin"))
     {
         dir=config.getServletContext().getRealPath("/")+"/admin/jsp/";
+    }else if(id.equals("admin_ds"))
+    {
+        dir=config.getServletContext().getRealPath("/")+"/admin/ds/";
     }else if(id.equals("api"))
     {
         dir=config.getServletContext().getRealPath("/")+"/work/api/";
@@ -62,6 +65,9 @@
     }else if(id.equals("utils"))
     {
         dir=config.getServletContext().getRealPath("/")+"/utils/";
+    }else if(id.equals("web-inf"))
+    {
+        dir=config.getServletContext().getRealPath("/")+"/WEB-INF/";
     }
     //System.out.println(dir);
     String sfn = request.getParameter("sfn");

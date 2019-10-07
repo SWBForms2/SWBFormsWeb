@@ -44,11 +44,11 @@ eng.dataStores["mongodb"] = {
 };
 
 /*
- eng.dataStores["ts_leveldb"]={
- path:"/data/leveldb",
- class: "org.semanticwb.datamanager.datastore.SemDataStore",
- };
- */
+eng.dataStores["ts_leveldb"]={
+    path:"/data/leveldb",
+    class: "org.semanticwb.datamanager.datastore.SemDataStoreLevelDB",
+};
+*/
 
 //******* DataSources ************
 var roles = {prog: "Programmer", su: "Super User", admin: "Admin", user: "User"};
@@ -212,7 +212,7 @@ eng.dataProcessors["DefPropertiesProcessor"] = {
                     request.data["_id"] = ds.getBaseUri() + request.data["id"];
                 }
 
-                if (ds.getScriptField("created") !== null)
+                if (ds.findScriptFields("name","created") !== null)
                 {
                     request.data.created = new Date().toISOString();
                     if (this.user)
@@ -222,7 +222,7 @@ eng.dataProcessors["DefPropertiesProcessor"] = {
                 }
             } else if (action === "update")
             {
-                if (ds.getScriptField("updated") !== null)
+                if (ds.findScriptFields("name","updated") !== null)
                 {
                     request.data.updated = new Date().toISOString();
                     if (this.user)
@@ -231,6 +231,18 @@ eng.dataProcessors["DefPropertiesProcessor"] = {
                     }
                 }
             }
+            {
+                var fs = ds.findScriptFields("type", "time");
+                for (var i = 0; i < fs.size(); i++)
+                {
+                    var t=request.data[fs[i].getString("name")];
+                    if(t)
+                    {
+                        var j=t.indexOf(".");
+                        if(j>-1)request.data[fs[i].getString("name")]=t.substring(0,j);
+                    }
+                }
+            }            
             if (request.data._swbf_processAction !== null)
             {
                 var err=this.getProcessMgr().processAction(this,request.data,trxParams);

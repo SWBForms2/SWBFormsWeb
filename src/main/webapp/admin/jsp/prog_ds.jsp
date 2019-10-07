@@ -21,7 +21,7 @@
     //boolean fields=request.getParameter("fields")!=null; 
     //boolean data=request.getParameter("data")!=null; 
     boolean add=(id!=null && id.length()==0);
-    
+
     if(!iframe)
     {
 %>
@@ -59,6 +59,7 @@
                     <li class="active"><a href="#info" data-toggle="tab" ondblclick="f_info.src='<%=_fileName%>?iframe=true&mode=detail&id=<%=id%>'"><%=add?"Agregar DataSource":"Información"%></a></li>
 <%if(!add){%>
                     <li><a href="#fields" data-toggle="tab" ondblclick="f_fields.src='<%=_fileName%>?iframe=true&mode=fields&id=<%=id%>'" onclick="this.onclick=undefined;this.ondblclick();">Propiedades</a></li>
+                    <li><a href="#index" data-toggle="tab" ondblclick="f_index.src='<%=_fileName%>?iframe=true&mode=index&id=<%=id%>'" onclick="this.onclick=undefined;this.ondblclick();">Indices</a></li>
                     <li><a href="#data" data-toggle="tab" ondblclick="f_data.src='<%=_fileName%>?iframe=true&mode=data&id=<%=id%>'" onclick="this.onclick=undefined;this.ondblclick();">Datos</a></li>
                     <li><a href="#import" data-toggle="tab" ondblclick="f_import.src='prog_dsfu?id=<%=id%>'" onclick="this.onclick=undefined;this.ondblclick();">Importar</a></li>
 <%}%>
@@ -70,6 +71,9 @@
 <%if(!add){%>
                     <div class="tab-pane" id="fields">
                         <iframe id="f_fields" class="ifram_content" frameborder="0" width="100%">Cargando...</iframe>
+                    </div><!-- /.tab-pane -->
+                    <div class="tab-pane" id="index">
+                        <iframe id="f_index" class="ifram_content" frameborder="0" width="100%">Cargando...</iframe>
                     </div><!-- /.tab-pane -->
                     <div class="tab-pane" id="data">
                         <iframe id="f_data" class="ifram_content" frameborder="0" width="100%">Cargando...</iframe>
@@ -127,7 +131,8 @@
                 canEdit: true,
                 canAdd: true,
                 canRemove: true,
-                //showFilter: true,
+                showFilter: true,
+                sortField: "id",
                 //canReorderRecords: true,
                 //canAcceptDroppedRecords: true,
                 
@@ -144,7 +149,7 @@
                     {name: "roles_update"},
                     {name: "roles_remove"},   
                     
-                    {name: "edit", title: " ", width:32, canEdit:false, formatCellValue: function (value) {return " ";}},
+                    {name: "edit", title: " ", width:32, canEdit:false, canFilter:false, formatCellValue: function (value) {return " ";}},
                 ],
 
                 createRecordComponent: function (record, colNum) {
@@ -379,6 +384,50 @@
             var _toolStrip=grid.getGridMembers()[2];
             _toolStrip.addMember(_copyProp,3);            
 
+<%
+        }else if("index".equals(mode))
+        {
+%>
+            var grid=eng.createGrid({
+                //gridType: "TreeGrid",
+                autoResize: true,
+                resizeHeightMargin: 20,
+                resizeWidthMargin: 15,
+                canEdit: true,
+                canAdd: true,
+                canRemove: true,
+                //canReorderRecords: true,
+                //canAcceptDroppedRecords: true,
+                
+                expansionFieldImageShowSelected:true,
+                canExpandRecords: true,
+                                
+                initialCriteria: {"ds":"<%=id%>"},
+                fields: [
+                    //{name: "ds"},
+                    {name: "name"},
+                    {name: "description", length: 500},        
+                ],
+                getExpansionComponent : function (record) 
+                {
+                    var grd=eng.createGrid({
+                        height:200,       
+                        canEdit: true,
+                        canAdd: true,
+                        canRemove: true,
+                        showFilter: false,
+                        editByCell: true,
+                        _ds:"<%=id.substring(id.lastIndexOf(":")+1)%>",
+                        initialCriteria: {"dsindex":record._id},
+                        fields: [
+                            {name: "prop"},
+                            {name: "type"},
+                        ],                                                
+                    }, "<%=_ds%>IndexFields");  
+                    return grd;
+                }                        
+                
+            }, "<%=_ds%>Index");    
 <%
         }else if("data".equals(mode))
         {

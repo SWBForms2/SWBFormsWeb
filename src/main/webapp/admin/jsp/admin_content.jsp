@@ -1,8 +1,10 @@
 <%-- 
-    Document   : prog_menu
+    Document   : admin_content.jsp
     Created on : 10-feb-2018, 19:57:02
     Author     : javiersolis
---%><%@page import="java.util.HashMap"%>
+--%><%@page import="java.util.Collections"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="java.util.HashMap"%>
 <%@page import="java.net.URLEncoder"%>
 <%@page import="java.net.URL"%>
 <%@page import="java.util.Map"%>
@@ -75,7 +77,7 @@
         return fields;
     }    
 
-    public StringBuilder getFields(DataObject obj, String propsField, DataList extProps, SWBScriptEngine eng)
+    public StringBuilder getFields(DataObject obj, String propsField, DataList extProps, SWBScriptEngine eng, boolean mode_add)
     {
         StringBuilder fields=new StringBuilder();
         DataList gridProps=obj.getDataList(propsField);
@@ -97,9 +99,16 @@
                     if(ext.getDataList("prop",empty).contains(_id))
                     {
                         String att=ext.getString("att");
-                        if(att.equals("canEditRoles")) {
-                            //System.out.println("canEditRoles:"+ext.getString("value"));
-                            boolean enabled = eng.hasUserAnyRole(ext.getString("value").split(","));
+                        if(att.equals("canEditRoles") || att.equals("canEditModes")) {
+                            boolean enabled = true;
+                            if(att.equals("canEditRoles"))enabled=eng.hasUserAnyRole(ext.getString("value").split(","));
+                            if(att.equals("canEditModes"))
+                            {
+                                ArrayList modes=new ArrayList();
+                                for(String t:ext.getString("value").split(","))modes.add(t);
+                                if(!modes.contains("add") && mode_add)enabled=false;
+                                if(!modes.contains("update") && !mode_add)enabled=false;
+                            }
                             row.append(", disabled:"+!enabled);
                         }else if(att.equals("canViewRoles")) {
                             boolean visible = eng.hasUserAnyRole(ext.getString("value").split(","));
@@ -276,15 +285,15 @@
     if("process_tray".equals(type))
     {
         extProps=getExtProps(obj,"gridExtProps",eng);
-        fields=getFields(obj, "gridProps", extProps, eng);
+        fields=getFields(obj, "gridProps", extProps, eng, add);
     }else if(id==null)
     {
         extProps=getExtProps(obj,"gridExtProps",eng);
-        fields=getFields(obj, "gridProps", extProps, eng);
+        fields=getFields(obj, "gridProps", extProps, eng, add);
     }else
     {
         extProps=getExtProps(obj,"formExtProps",eng);
-        fields=getFields(obj, "formProps", extProps, eng);
+        fields=getFields(obj, "formProps", extProps, eng, add);
     }
     
     if(!iframe)
@@ -448,7 +457,7 @@
         <title><%=_title%></title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="<%=contextPath%>/platform/js/eng.js?id=<%=eng.getId()%>" type="text/javascript"></script>
+        <script src="<%=contextPath%>/platform/js/eng.min.js?id=<%=eng.getId()%>" type="text/javascript"></script>
         <link href="<%=contextPath%>/admin/css/sc_admin.css" rel="stylesheet" type="text/css" />
     </head>
     <body>

@@ -1,3 +1,6 @@
+eng.validators["unique"] = {type: "isUnique", errorMessage: "El valor del campo debe de ser único"};
+eng.validators["id"] = {type: "regexp", expression: "^([a-zA-Z0-9_+])+$", errorMessage: "Identificador no valido"};
+
 //******* Contants ************
 var type_pages = {
     "head": "Head",
@@ -31,6 +34,7 @@ var ds_field_atts = [];
 
 var ds_field_atts_vals={    
     canEdit:{type:"boolean"},
+    canEditModes:{type:"string", editorType:"SelectOtherItem", multiple:true, valueMap:{add:"Add", update:"Update"}},    
     canEditRoles:{type:"string", editorType:"SelectOtherItem", multiple:true, valueMap:roles},    
     canFilter:{type:"boolean"},
     canViewRoles:{type:"string", editorType:"SelectOtherItem", multiple:true, valueMap:roles}, 
@@ -197,6 +201,55 @@ eng.dataServices["DataSourceService"] = {
         while(it.hasNext())
         {
             this.getDataSource("DataSourceFields").removeObj(it.next());
+        }
+    }
+};
+
+
+eng.dataSources["DataSourceIndexFields"] = {
+    scls: "DataSourceIndexFields",
+    modelid: _modelid,
+    dataStore: _dataStore,
+    displayField: "prop",
+    fields: [
+        {name: "dsindex", title: "DataSourceIndex", stype: "select", dataSource:"DataSourceIndex"},
+        {name: "prop", title: "Propiedad", stype: "select", dataSource:"ScriptDataSourceField", editorProperties:{sortField:null}, textMatchStyle:"exactCase", getFilterCriteria:function() {
+            //console.log(this);
+            var ds = this.grid._ds;
+            //console.log(ds);
+            return {"ds":ds};
+        }},
+        {name: "type", title: "Tipo", type: "select", valueMap:{"1":"Ascendente","-1":"Descendente","\"text\"":"Texto"}},
+    ],
+    //security:{"fetch":{"roles":["prog"]}, "add":{"roles":["prog"]}, "update":{"roles":["prog"]}, "remove":{"roles":["prog"]}},
+};
+
+eng.dataSources["DataSourceIndex"] = {
+    scls: "DataSourceIndex",
+    modelid: _modelid,
+    dataStore: _dataStore,
+    displayField: "name",
+    fields: [
+        {name: "ds", title: "DataSource", stype: "select", dataSource:"DataSource"},
+        {name: "name", title: "Identificador", type: "string", validators: [{stype: "id"}]},
+        {name: "description", title: "Descripción", type: "string"},    
+        {name: "created", title: "Fecha de Registro", type: "date", editorType: "StaticTextItem", canEdit: false},
+        {name: "creator", title: "Usuario Creador", type: "string", editorType: "StaticTextItem", canEdit: false},
+        {name: "updated", title: "Ultima Actualización", type: "date", editorType: "StaticTextItem", canEdit: false},
+        {name: "updater", title: "Usuario Ultima Actualización", type: "string", editorType: "StaticTextItem", canEdit: false},
+    ],
+    //security:{"fetch":{"roles":["prog"]}, "add":{"roles":["prog"]}, "update":{"roles":["prog"]}, "remove":{"roles":["prog"]}},
+};
+
+eng.dataServices["DataSourceIndexService"] = {
+    dataSources: ["DataSourceIndex"],
+    actions:["remove"],
+    service: function(request, response, dataSource, action, trxParams)
+    {
+        var it=this.getDataSource("DataSourceIndexFields").find({data:{dsindex:request.data["_id"]}});
+        while(it.hasNext())
+        {
+            this.getDataSource("DataSourceIndexFields").removeObj(it.next());
         }
     }
 };
@@ -434,7 +487,7 @@ eng.dataSources["PageProps"] = {
     fields: [
         {name: "prop", title: "Propiedad", stype: "select", multiple:true, dataSource:"ScriptDataSourceField", editorProperties:{sortField:null}, textMatchStyle:"exactCase", getFilterCriteria:function() {
             var ds = form.getValue("ds");
-            console.log(ds);
+            //console.log(ds);
             return {"ds":ds};
         }},
         {name: "att", title: "Atributo", type: "selectOther", valueMap:ds_view_atts, 
@@ -547,7 +600,7 @@ eng.dataSources["ScriptDataSourceField"]={
 };
 
 eng.dataServices["ReloadScriptEngineService"] = {
-    dataSources: ["DataSource","DataSourceFields","DataSourceFieldsExt","ValueMap","ValueMapValues","Validator","ValidatorExt","DataProcessor", "DataService", "DataExtractor","GlobalScript"],
+    dataSources: ["DataSource","DataSourceFields","DataSourceFieldsExt","DataSourceIndex","DataSourceIndexFields","ValueMap","ValueMapValues","Validator","ValidatorExt","DataProcessor", "DataService", "DataExtractor","GlobalScript"],
     actions:["add", "update","remove"],
     order:100000,
     service: function(request, response, dataSource, action, trxParams)

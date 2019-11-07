@@ -312,8 +312,10 @@ public class FormsFilter implements Filter {
             //System.out.println("checkIfHeaders:"+true);
             return true;
         }
+
+        boolean compress=path.endsWith(".gz");
+        String contentType = request.getSession().getServletContext().getMimeType(compress?path.substring(0,path.length()-3):path);
         
-        String contentType = request.getSession().getServletContext().getMimeType(path);
         if(contentType==null)contentType="bin/application";
         if(file.isDirectory())
         {
@@ -327,6 +329,7 @@ public class FormsFilter implements Filter {
         //System.out.println("process:"+path);
         
         response.setContentType(contentType);
+        if(compress)response.setHeader("Content-Encoding", "gzip");
 
         boolean gzip = false;
         if (agzip)

@@ -17,6 +17,15 @@
             <version>7.0</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>closure-compiler</groupId>
+            <artifactId>closure-compiler-v20190929</artifactId>
+            <version>v20190929</version>
+            <scope>system</scope>
+            <systemPath>
+              ${basedir}/../SWBFormsWeb/lib/closure-compiler-v20190929.jar
+            </systemPath>
+        </dependency>       
     </dependencies>    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -52,6 +52,9 @@
 
     if(id.equals("admin"))
     {
+        dir=config.getServletContext().getRealPath("/")+"/admin/";
+    }else if(id.equals("admin_jsp"))
+    {
         dir=config.getServletContext().getRealPath("/")+"/admin/jsp/";
     }else if(id.equals("admin_ds"))
     {

@@ -6,20 +6,24 @@
 <%@page import="org.semanticwb.datamanager.*"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-    SWBScriptEngine eng = DataMgr.initPlatform("/admin/ds/datasources.js", session);
-    DataObject user = eng.getUser();
-    DataList roles=user.addSubList("roles");
+    DataObject user=new DataObject();
+    user.addParam("username", "autologin");
+    user.addParam("email", "autologin@test.com");
+    user.addParam("fullname", "Autologin");
+    DataList roles=new DataList();
+    user.addParam("roles", roles);
     roles.add("prog");
-    roles.add("admin");
     roles.add("user");
+    roles.add("admin");
+    session.setAttribute("_USER_", user);
 %>
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Create Programmer User</title>
+        <title>Autologin</title>
     </head>
     <body>
-        <h1>Your user has now programmer role...</h1>
+        <h1>Autologin...</h1>
     </body>
 </html>

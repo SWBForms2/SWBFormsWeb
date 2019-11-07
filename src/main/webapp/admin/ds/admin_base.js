@@ -10,6 +10,8 @@ var type_pages = {
     "iframe_content": "IFrame Content",
     "sc_grid": "SC Grid",
     "sc_grid_detail": "SC Grid Detail",
+    "sc_fulltext_search_detail": "SC Fulltext Search Detail",
+    "sc_search_detail": "SC Search Detail",
     "sc_form": "SC Form",
     "process_tray": "Process Tray",
 };
@@ -34,7 +36,7 @@ var ds_field_atts = [];
 
 var ds_field_atts_vals={    
     canEdit:{type:"boolean"},
-    canEditModes:{type:"string", editorType:"SelectOtherItem", multiple:true, valueMap:{add:"Add", update:"Update"}},    
+    canEditModes:{type:"string", editorType:"SelectOtherItem", multiple:true, valueMap:{"add":"Add", "update":"Update"}},    
     canEditRoles:{type:"string", editorType:"SelectOtherItem", multiple:true, valueMap:roles},    
     canFilter:{type:"boolean"},
     canViewRoles:{type:"string", editorType:"SelectOtherItem", multiple:true, valueMap:roles}, 
@@ -63,7 +65,7 @@ var ds_field_atts_vals={
     stype:{type:"string", editorType:"SelectOtherItem", valueMap:{"select":"select","multiSelect":"multiSelect","gridSelect":"gridSelect","listGridSelect":"listGridSelect","grid":"grid","time":"time","file":"file","text":"text","html":"html","autogen":"autogen","sequence":"sequence","id":"id"}},
     title:{type:"string", viewAtt:true},
     type:{type:"string", viewAtt:true, editorType:"SelectOtherItem", valueMap:ds_field_types},
-    validators:{type:"object", editorType:"SelectItem", multiple:true, valueMap:{}},
+    validators:{type:"string", editorType:"SelectOtherItem", multiple:true, valueMap:{}},
     valueMap:{type:"object"},                                                                               //select
     valueField:{type:"string"},                                                                               //select
     width:{type:"string", viewAtt:true},
@@ -525,7 +527,15 @@ eng.dataSources["Page"] = {
         {name: "roles_view", title: "Roles de Acceso", type: "select", multiple:true, valueMap:roles},
         {name: "path", title: "Ruta del Archivo", type: "string"},        
         //{name: "ds", title: "DataSource", type: "select", editorType: "ComboBoxItem", valueMap:dataSourcesMap},
-        {name: "ds", title: "DataSource", type: "selectOther", valueMap:ds_dataSources, changed:"form.clearValue('gridProps');form.clearValue('formProps');"},        
+        {name: "engine", title: "ScriptEngine", type: "string", defaultValue:"/admin/ds/datasources.js"},                
+        {name: "ds", title: "DataSource", type: "selectOther", valueMap:ds_dataSources, changed:"form.clearValue('searchProps');form.clearValue('gridProps');form.clearValue('formProps');"},                
+        {name: "searchProps", title: "Propiedades de Búsqueda", multiple:true, canReorder_:true, stype: "select", editorType_:"MultiComboBoxItem", layoutStyle_:"verticalReverse", dataSource:"ScriptDataSourceField", textMatchStyle:"exactCase", editorProperties:{sortField:null}, getFilterCriteria:function() {
+            //canceled this for use MultiComboBoxItem, defined in onLoad Form
+            var ds = this.form.getValue("ds");
+            return {"ds":ds};
+        }},
+        {name: "searchExtProps", title: "Propiedades Extendidas de Búsqueda", stype: "grid", canReorderRecords:true, dataSource:"PageProps"},
+        {name: "searchAddiJS", title: "JScript Adicional a la Búsqueda", stype: "text"},        
         {name: "gd_conf", title: "Caracteristicas del Grid", type: "select", multiple:true, valueMap:{"inlineEdit":"Editar en Linea", "inlineAdd":"Agregar en linea"}},
         {name: "gridProps", title: "Propiedades del Grid", multiple:true, canReorder_:true, stype: "select", editorType_:"MultiComboBoxItem", layoutStyle_:"verticalReverse", dataSource:"ScriptDataSourceField", textMatchStyle:"exactCase", editorProperties:{sortField:null}, getFilterCriteria:function() {
             //canceled this for use MultiComboBoxItem, defined in onLoad Form
@@ -549,7 +559,8 @@ eng.dataSources["Page"] = {
             var ds=eng.getDataSource("SWBF_Process").fetchObjById(value).ds;
             this.form.setValue("ds",ds);
         }},        
-        
+        {name: "contextBox", title: "Ruta Archvo de Caja de Contexto", type: "string"},        
+        {name: "helpBox", title: "Caja de Ayuda", type: "string", stype: "html"},        
         {name: "roles_add", title: "Roles de Creación", type: "select", multiple:true, valueMap:roles},
         {name: "roles_update", title: "Roles de Edición", type: "select", multiple:true, valueMap:roles},
         {name: "roles_remove", title: "Roles de Eliminación", type: "select", multiple:true, valueMap:roles},

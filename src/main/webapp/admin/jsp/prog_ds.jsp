@@ -29,12 +29,13 @@
 <section class="content-header">
     <h1>
         <%=_title%>
-        <small></small>
+        <small><%=id!=null?id.substring(id.lastIndexOf(":")+1):""%></small>
     </h1>
     <ol class="breadcrumb">
         <li><a href="<%=contextPath%>/admin"><i class="fa fa-home"></i>Home</a></li>
         <li>Programación</li>
         <li <%=("detail".equals(mode))?"":"class=\"active\""%>><a href="<%=_fileName%>" data-history="#<%=_fileName%>" data-target=".content-wrapper" data-load="ajax"><%=_title%></a></li>
+        <%if(!add){%><li><%=id!=null?id.substring(id.lastIndexOf(":")+1):"Lista"%></li><%}%>
 <%
         if("detail".equals(mode))
         {            
@@ -111,8 +112,7 @@
         <title><%=_title%></title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="<%=contextPath%>/platform/js/eng.js?id=<%=eng.getId()%>" type="text/javascript"></script>
-        <link href="<%=contextPath%>/admin/css/sc_admin.css" rel="stylesheet" type="text/css" />
+        <%@include file="adm_sc_head.jsp"%>
     </head>
     <body>
         <script type="text/javascript">
@@ -252,7 +252,7 @@
                                     return editField._lastItem;
                                 }
                             } 
-                            return null;
+                            return {};
                         },                        
                     }, "<%=_ds%>FieldsExt");  
                     return grd;

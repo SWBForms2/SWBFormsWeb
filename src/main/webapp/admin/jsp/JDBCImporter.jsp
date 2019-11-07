@@ -252,7 +252,7 @@
         int l=rsmd.getColumnCount();
         while(rs.next()){
             DataObject rec=new DataObject();
-            for(int x=1;x<l;x++)
+            for(int x=1;x<=l;x++)
             {
                 Object value=rs.getObject(x);
                 if(value!=null)rec.addParam(rsmd.getColumnName(x), value);

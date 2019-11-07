@@ -2,143 +2,50 @@
     Document   : admin_content.jsp
     Created on : 10-feb-2018, 19:57:02
     Author     : javiersolis
---%><%@page import="java.util.Collections"%>
-<%@page import="java.util.ArrayList"%>
-<%@page import="java.util.HashMap"%>
-<%@page import="java.net.URLEncoder"%>
-<%@page import="java.net.URL"%>
-<%@page import="java.util.Map"%>
-<%@page import="org.semanticwb.datamanager.script.ScriptObject"%>
-<%@page import="java.io.IOException"%><%@page import="java.util.Iterator"%><%@page import="org.semanticwb.datamanager.*"%><%@page contentType="text/html" pageEncoding="UTF-8"%><%!
-
-    public String parseScript(String txt, HttpServletRequest request, DataObject user)
+--%><%@page import="java.util.*"%><%@page import="java.net.*"%><%@page import="java.io.IOException"%><%@page import="org.semanticwb.datamanager.*"%><%@page import="org.semanticwb.datamanager.script.ScriptObject"%><%@page contentType="text/html" pageEncoding="UTF-8"%><%!
+    
+    String getPageLink(DataObject base, boolean active, boolean link)
     {
-        if(txt==null)return "";    
-
-        Iterator it=DataUtils.TEXT.findInterStr(txt, "{$getParameter:", "}");
-        while(it.hasNext())
+        //System.out.println("page:"+page.getId()+"->"+active+"->"+link);
+        DataObject page=base;
+        StringBuilder ret=new StringBuilder();
+        String title=page.getString("name","");
+        String path=page.getString("path");
+        String type=page.getString("type");
+        
+        if("head".equals(type))
         {
-            String s=(String)it.next();
-            String k=s.trim();
-            if((k.startsWith("'") && k.endsWith("'")) || (k.startsWith("\"") && k.endsWith("\"")))k=k.substring(1,k.length()-1);
-            String replace=request.getParameter(k);
-            if(replace==null)replace="";
-            txt=txt.replace("{$getParameter:"+s+"}", replace);
-        }
-
-        it=DataUtils.TEXT.findInterStr(txt, "{$user:", "}");
-        while(it.hasNext())
+            //
+        }else if("group_menu".equals(type))
         {
-            String s=(String)it.next();
-            String k=s.trim();
-            if((k.startsWith("'") && k.endsWith("'")) || (k.startsWith("\"") && k.endsWith("\"")))k=k.substring(1,k.length()-1);
-            String replace=user.getString(k,"");
-            txt=txt.replace("{$user:"+s+"}", replace);
+            ret.append("<li"+(active?" class=\"active\"":"")+">");
+            ret.append(title);
+            ret.append("</li>");      
+        }else if("url_content".equals(type))
+        {
+            ret.append("<li"+(active?" class=\"active\"":"")+">");
+            if(link)if(path!=null)ret.append("<a href=\""+path+"\">");
+            ret.append(title);
+            if(link)if(path!=null)ret.append("</a>");
+            ret.append("</li>");            
+        }else if("ajax_content".equals(type))
+        {
+            ret.append("<li"+(active?" class=\"active\"":"")+">");
+            if(link)if(path!=null)ret.append("<a href=\""+path+"\" data-history=\"#"+page.getNumId()+"\" data-target=\".content-wrapper\" data-load=\"ajax\">");
+            ret.append(title);
+            if(link)if(path!=null)ret.append("</a>");
+            ret.append("</li>");            
+        }else 
+        {
+            ret.append("<li"+(active?" class=\"active\"":"")+">");
+            if(link)ret.append("<a href=\"admin_content?p="+page.getNumId()+"\" data-history=\"#"+page.getNumId()+"\" data-target=\".content-wrapper\" data-load=\"ajax\">");
+            ret.append(title);
+            if(link)ret.append("</a>");
+            ret.append("</li>");            
         }
-        return txt;
+        return ret.toString();
     }
     
-    public DataList getExtProps(DataObject obj, String extPropsField, SWBScriptEngine eng) throws IOException
-    {
-        DataList extProps=new DataList();
-        DataList data=obj.getDataList(extPropsField);
-        if(data!=null)
-        {
-            DataObject query=new DataObject();
-            query.addSubObject("data").addParam("_id", data);
-            extProps=eng.getDataSource("PageProps").fetch(query).getDataObject("response").getDataList("data");
-        }
-        return extProps;
-    }
-
-    public StringBuilder getProps(DataList extProps, HttpServletRequest request, DataObject user)
-    {
-        StringBuilder fields=new StringBuilder();
-        DataList empty=new DataList();
-        for(int i=0;i<extProps.size();i++)
-        {
-            DataObject ext=extProps.getDataObject(i);
-            if(ext.getDataList("prop",empty).isEmpty())
-            {
-                String att=ext.getString("att");
-                String value=parseScript(ext.getString("value"),request,user);
-                String type=ext.getString("type");
-                fields.append(att+":");
-                if("string".equals(type) || "date".equals(type))
-                {
-                    fields.append("\""+value+"\"");
-                }else
-                {
-                    fields.append(value);
-                }
-                fields.append(",\n");
-            }
-        }
-        return fields;
-    }    
-
-    public StringBuilder getFields(DataObject obj, String propsField, DataList extProps, SWBScriptEngine eng, boolean mode_add)
-    {
-        StringBuilder fields=new StringBuilder();
-        DataList gridProps=obj.getDataList(propsField);
-        DataList empty=new DataList();
-        if(gridProps!=null)
-        {
-            Iterator<String> it=gridProps.iterator();
-            while (it.hasNext()) {
-                String _id = it.next();
-                String name=_id.substring(_id.indexOf(".")+1);
-                //System.out.println(_id);
-                boolean add=true;
-                StringBuilder row=new StringBuilder();
-                row.append("{");
-                row.append("name:"+"\""+name+"\"");
-                for(int i=0;i<extProps.size();i++)
-                {
-                    DataObject ext=extProps.getDataObject(i);
-                    if(ext.getDataList("prop",empty).contains(_id))
-                    {
-                        String att=ext.getString("att");
-                        if(att.equals("canEditRoles") || att.equals("canEditModes")) {
-                            boolean enabled = true;
-                            if(att.equals("canEditRoles"))enabled=eng.hasUserAnyRole(ext.getString("value").split(","));
-                            if(att.equals("canEditModes"))
-                            {
-                                ArrayList modes=new ArrayList();
-                                for(String t:ext.getString("value").split(","))modes.add(t);
-                                if(!modes.contains("add") && mode_add)enabled=false;
-                                if(!modes.contains("update") && !mode_add)enabled=false;
-                            }
-                            row.append(", disabled:"+!enabled);
-                        }else if(att.equals("canViewRoles")) {
-                            boolean visible = eng.hasUserAnyRole(ext.getString("value").split(","));
-                            row.append(", visible:"+visible);
-                            add=visible;
-                        }else {
-                            // original
-                            String value=ext.getString("value");
-                            String type=ext.getString("type");
-                            row.append(", "+att+":");
-                            if("string".equals(type) || "date".equals(type))
-                            {
-                                row.append("\""+value+"\"");
-                            }else
-                            {
-                                row.append(value);
-                            }
-                            // fin. original
-                        }
-                    }
-                }
-                row.append("}");
-                if(it.hasNext())row.append(",");
-                if(add)fields.append(row);
-                fields.append("\n");
-            }
-        }    
-        return fields;
-    }
-
     String getParentPath(DataObject page, SWBScriptEngine eng) throws IOException
     {
         StringBuilder ret=new StringBuilder();
@@ -146,32 +53,139 @@
         if(parentId!=null)
         {
             DataObject obj=eng.getDataSource("Page").getObjectById(parentId);   
-            String title=obj.getString("name","");
-            //String smallName=obj.getString("smallName","");
-            String path=obj.getString("path");
-            String iconClass=obj.getString("iconClass");
-            if(iconClass==null)iconClass="fa fa-circle-o";
-            String type=obj.getString("type");
-            
-            if("sc_grid".equals(type))path="admin_content?pid="+obj.getNumId();
-            if("sc_grid_detail".equals(type))path="admin_content?pid="+obj.getNumId();
-            if("sc_form".equals(type))path="admin_content?pid="+obj.getNumId();
-            if("iframe_content".equals(type))path="admin_content?pid="+obj.getNumId();
-            if("ajax_content".equals(type))path="admin_content?pid="+obj.getNumId();            
-            if("process_tray".equals(type))path="admin_content?pid="+obj.getNumId();            
-            
-            if(type!=null && !type.equals("head"))
-            {
-                ret.append(getParentPath(obj,eng));
-                ret.append("<li>");
-                if(path!=null)ret.append("<a href=\""+path+"\">");
-                //if(iconClass!=null)ret.append("<i class=\""+iconClass+"\"></i> ");
-                ret.append(title);
-                if(path!=null)ret.append("</a>");
-                ret.append("</li>");
-            }
+            ret.append(getParentPath(obj,eng));
+            ret.append(getPageLink(obj,false,true));
         }
         return ret.toString();
+    } 
+   
+    
+    String getPagePath(SWBScriptEngine eng, HttpServletRequest request, DataList<String> paths, DataList<String> helpBoxes) throws IOException
+    {
+        StringBuilder ret=new StringBuilder();
+        for(int x=0;x<paths.size();x++)
+        {
+            boolean last=(x==(paths.size()-1));
+            boolean first=(x==0);
+            
+            String p=paths.get(x);            
+            String pid=p;
+            String id=null;
+            
+            int i=pid.indexOf(":");
+            if(i>-1)
+            {
+                id=pid.substring(i+1);
+                pid=pid.substring(0,i);
+            }    
+                        
+            DataObject obj=eng.getDataSource("Page").getObjectByNumId(pid);   
+            if(first)
+            {
+                ret.append(getParentPath(obj,eng));
+            }
+
+            if(first)
+            {
+                ret.append(getPageLink(obj,last && id==null,true));                    
+            }else
+            {
+                ret.append("<li>");
+                ret.append("<a href=\"admin_content?"+getParams(paths, x)+"&t=tab_"+obj.getNumId()+"\" data-history=\"#"+obj.getNumId()+"\" data-target=\".content-wrapper\" data-load=\"ajax\">");
+                ret.append(obj.getString("name",""));
+                ret.append("</a>");
+                ret.append("</li>");                
+            }
+            
+            if(id!=null && id.length()>0)
+            {
+                DataObject objd=eng.getDataSource(obj.getString("ds")).getObjectByNumId(id);
+                if(objd!=null)
+                {
+                    String name=objd.getNumId();
+                    String df=eng.getDataSource(objd.getClassName()).getDisplayField();
+                    if(df!=null)name=objd.getString(df);        
+                    ret.append("<li "+(last?"class=\"active\"":"")+">");
+                    if(!last)ret.append("<a href=\"admin_content?"+getParams(paths, x+1)+"\" data-history=\"#"+obj.getNumId()+"\" data-target=\".content-wrapper\" data-load=\"ajax\">");
+                    ret.append(name);
+                    if(!last)ret.append("</a>");
+                    ret.append("</li>");
+                }
+            }   
+            
+            //contextBoxes
+            if(!last)
+            {
+                String contextBox=obj.getString("contextBox","").trim();
+                if(!contextBox.isEmpty())
+                {
+                    contextBox=request.getContextPath()+contextBox+"?id="+id;
+                    StringBuilder txt=new StringBuilder();
+                    txt.append("<div id=\"pg_"+obj.getNumId()+"\" class=\"col-md-4 callout callout-info lead\">");                    
+                    txt.append("</div>"); 
+                    txt.append("<script type=\"text/javascript\">");
+                    txt.append("loadContent(\""+contextBox+"\",\"#pg_"+obj.getNumId()+"\");");
+                    txt.append("</script>");
+                    helpBoxes.add(txt.toString());
+                }
+            }
+            
+        }
+        return ret.toString();
+    }
+    
+    String getParams(DataList<String> paths)
+    {
+        return getParams(paths, paths.size());
+    }
+    
+    String getParams(DataList<String> paths, int size)
+    {
+        StringBuilder ret=new StringBuilder();
+        ret.append("p=");
+        for(int x=0;x<size;x++)
+        {
+            String n = paths.get(x);
+            ret.append(n);
+            if(x<size-1)ret.append("/");
+        }
+        return ret.toString();
+    }
+    
+    DataList<String> getContentPaths(String params[], String id)
+    {
+        //Split path
+        DataList<String> paths=new DataList();
+        String ps[]=params;
+        for(String p:ps)
+        {
+            for(String p2:p.split("/"))
+            {
+                paths.add(p2);
+            }
+        }   
+        if(id!=null && id.length()>0)
+        {
+            if(paths.size()>0)
+            {
+                String last=paths.remove(paths.size()-1);
+                int li=id.lastIndexOf(":");
+                if(li>-1)last+=id.substring(li);
+                paths.add(last);
+            }
+        }
+        return paths;
+    }
+    
+    String getPath(String type, DataList<String> paths)
+    {
+        String fname=type;        
+        if("sc_grid".equals(type) 
+          || "sc_grid_detail".equals(type)
+          || "sc_fulltext_search_detail".equals(type)
+          || "sc_search_detail".equals(type)
+        )fname="sc_grid";
+        return "adm_cnt_"+fname+"?"+getParams(paths);        
     }
 
 %><%
@@ -179,22 +193,35 @@
     SWBScriptEngine eng=DataMgr.initPlatform("/admin/ds/admin.js", session);
     DataObject user=eng.getUser();
     
-    String pid=request.getParameter("pid");
-    boolean iframe=request.getParameter("iframe")!=null; 
-    boolean aiframe=request.getParameter("aiframe")!=null; 
-    boolean detail=request.getParameter("detail")!=null;
-    String id=request.getParameter("id");    
-    String rid=request.getParameter("rid");    
+    //Map<String,String[]> pmap=new HashMap();
+    //pmap.putAll(request.getParameterMap());    
+    
+    //Tab
+    String t=request.getParameter("t");
+    String a=request.getParameter("a");
+    //Split path
+    DataList<String> paths=getContentPaths(request.getParameterValues("p"),request.getParameter("id"));
+    String p=getParams(paths);
+    
+    
+    String pl=paths.get(paths.size()-1);    
+    String pid=pl;
+    String id=null;
+    int i=pid.indexOf(":");
+    if(i>-1)
+    {
+        id=pid.substring(i+1);
+        pid=pid.substring(0,i);
+    }   
+    
     
     //Find extra parameters
     Map<String,String[]> pmap=new HashMap();
     pmap.putAll(request.getParameterMap());    
-    pmap.remove("pid");
-    pmap.remove("iframe");
-    pmap.remove("aiframe");
-    pmap.remove("detail");
+    pmap.remove("t");
+    pmap.remove("a");
+    pmap.remove("p");
     pmap.remove("id");
-    pmap.remove("rid");
     StringBuilder extp=new StringBuilder();
     Iterator<String> eit=pmap.keySet().iterator();
     while (eit.hasNext()) {
@@ -207,8 +234,6 @@
             extp.append(URLEncoder.encode(val,"UTF-8"));
         }
     }
-    if(extp.length()>0)extp.insert(0, "&");
-   
     
     DataObject obj=eng.getDataSource("Page").getObjectByNumId(pid);   
     //System.out.println(obj);
@@ -217,18 +242,19 @@
     String _ds=obj.getString("ds");
     String _path=obj.getString("path","");
     String _fileName="admin_content";
-    DataList gd_conf=obj.getDataList("gd_conf",new DataList());
     String type=obj.getString("type");
     
     if(id!=null && _path.length()>0)
     {
         _path=_path.replace("{id}", id);
-        String sid[]=id.split(":");
-        if(sid.length==4)_path=_path.replace("{ID}", sid[3]);    
+        //String sid[]=id.split(":");
+        //if(sid.length==4)_path=_path.replace("{ID}", sid[3]);    
     }
     
     //add context
     _path=_path.startsWith("/")?contextPath+_path:_path;
+    
+    if(extp.length()>0 && _path.length()>0)_path=_path.indexOf("?")>-1?_path+"&"+extp:_path+"?"+extp;
 
     if(!eng.hasUserAnyRole(obj.getDataList("roles_view")))
     {
@@ -240,67 +266,23 @@
     {
         response.sendError(404,"Página no encontrada...");
         return;        
-    }    
+    } 
     
-    //ajax iframe
-    if(aiframe)
+    boolean add=(a!=null);  
+
+    //
+    if(_path.length()==0)
     {
-        if("sc_form".equals(type))
-        {
-%>
-        <iframe class="ifram_content <%=pid%>" src="<%=_fileName%>?pid=<%=pid%>&iframe=true<%=(rid!=null)?("&rid="+rid):""%>&id=<%=id%>" frameborder="0" width="100%"></iframe>     
-<%
-        }else if(type.startsWith("sc_grid"))
-        {
-%>
-        <iframe class="ifram_content <%=pid%>" src="<%=_fileName%>?pid=<%=pid%>&iframe=true&rid=<%=id%>" frameborder="0" width="100%"></iframe>
-<%
-        }else if("process_tray".equals(type))
-        {
-%>
-        <iframe class="ifram_content <%=pid%>" src="<%=_fileName%>?pid=<%=pid%>&iframe=true<%=(rid!=null)?("&rid="+rid):""%>&id=<%=id%>" frameborder="0" width="100%"></iframe>
-<%
-        }else if("iframe_content".equals(type))
-        {
-%>
-        <iframe class="ifram_content <%=pid%>" src="<%=_path%>" frameborder="0" width="100%"></iframe>
-<%
-        }
-%>
-        <script type="text/javascript">
-            $(window).resize();
-        </script>
-<%
-        return;
-    }
-        
-    if("sc_form".equals(type))
-    {
-        if(id==null)id="";
-    }
-    boolean add=(id!=null && id.length()==0);   
-    
-    StringBuilder fields;
-    DataList extProps;
-    if("process_tray".equals(type))
-    {
-        extProps=getExtProps(obj,"gridExtProps",eng);
-        fields=getFields(obj, "gridProps", extProps, eng, add);
-    }else if(id==null)
-    {
-        extProps=getExtProps(obj,"gridExtProps",eng);
-        fields=getFields(obj, "gridProps", extProps, eng, add);
-    }else
-    {
-        extProps=getExtProps(obj,"formExtProps",eng);
-        fields=getFields(obj, "formProps", extProps, eng, add);
+        _path+=getPath(type, paths);
     }
     
-    if(!iframe)
-    {
-        //********************************** Ajax Content ************************************************************
-%>
-<!-- Content Header (Page header) -->
+    //helpBoxes
+    DataList<String> helpBoxes=new DataList();     
+    String breadcrumb=getPagePath(eng, request, paths, helpBoxes);            
+    String helpBox=obj.getString("helpBox","").trim();        
+    if(!helpBox.isEmpty())helpBoxes.add("<div class=\"col-md-4 callout callout-info lead\">"+helpBox+"</div>");  
+
+%><!-- Content Header (Page header) -->
 <section class="content-header">
     <h1>
         <%=_title%>
@@ -308,367 +290,105 @@
     </h1>
     <ol class="breadcrumb">
         <li><a href="<%=contextPath%>/admin"><i class="fa fa-home"></i>Home</a></li>
-        <%=getParentPath(obj,eng)%>
-        <li class="active"><a href="<%=_fileName%>?pid=<%=obj.getNumId()%>" data-history="#<%=obj.getNumId()%>" data-target=".content-wrapper" data-load="ajax"><%=_title%></a></li>
-<%
-    if(id!=null && id.length()>0)
-    {
-        DataObject objd=eng.getObjectById(id);
-        if(objd!=null)
-        {
-            String name=objd.getNumId();
-            String df=eng.getDataSource(objd.getClassName()).getDisplayField();
-            if(df!=null)name=objd.getString(df);
-%>
-        <li class="active"><%=name%></li>
-<%           
-        }
-    }
-%>        
+        <%=breadcrumb%>
     </ol>
 </section>
+<!--    
+<section class="content-header-desc" style="padding: 3px 15px 0px 15px;">
+    <div class="callout callout-info">
+        <h4>Tip!</h4>
+        <p>Add the layout-top-nav class to the body tag to get this layout. This feature can also be used with a
+            sidebar! So use this class if you want to remove the custom dropdown menus from the navbar and use regular
+            links instead.
+        </p>
+    </div>
+</section>
+-->
 <!-- Main content -->
-<% 
-        if(id==null)
-        {
+<%
+    if(!add && id==null)
+    {
 %>
 <section id="content" style="padding: 7px">  
-<%
-            if(type.equals("iframe_content"))
-            {
-%>    
-    <iframe class="ifram_content" src="<%=_path%>" frameborder="0" width="100%"></iframe>
-    <script type="text/javascript">
-        $(window).resize();
-    </script>            
-<%
-            }else if(type.equals("ajax_content"))
-            {
-%>    
-    <script type="text/javascript">
-        loadContent("<%=_path%>","#content");
-    </script>            
-<%
-            }else if(type.startsWith("sc"))
-            {
-%>
-    <iframe class="ifram_content <%=pid%>" src="<%=_fileName%>?pid=<%=pid%>&iframe=true<%=extp%>" frameborder="0" width="100%"></iframe>
+    <iframe class="ifram_content <%=pid%>" src="<%=_path%>" frameborder="0" width="100%"></iframe>
     <script type="text/javascript">
         $(window).resize();
     </script>                        
-<%
-            }else if("process_tray".equals(type))
-            {
-%>
-    <script type="text/javascript">
-        loadContent("admin_process_tray?pid=<%=pid%><%=extp%>","#content");
-    </script>  
-<!--    
-    <iframe class="ifram_content <%=pid%>" src="<%=_fileName%>?pid=<%=pid%>&iframe=true<%=extp%>" frameborder="0" width="100%"></iframe>
-    <script type="text/javascript">
-        $(window).resize();
-    </script>    
--->
-<%
-            }
-%>
 </section>
 <%
-        }else
-        { 
-            DataObject query=new DataObject();
-            query.addSubList("sortBy").add("order");
-            query.addSubObject("data").addParam("parentId", obj.getId());
-            DataList childs=eng.getDataSource("Page").fetch(query).getDataObject("response").getDataList("data");      
-            //System.out.println("child:"+childs);
+    }else
+    {
+        DataObject query=new DataObject();
+        query.addSubList("sortBy").add("order");
+        query.addSubObject("data").addParam("parentId", obj.getId());
+        DataList childs=eng.getDataSource("Page").fetch(query).getDataObject("response").getDataList("data");      
+        //System.out.println("child:"+childs);
 %>
 <section id="content" class="content">  
     <div class="row">
-        <div class="col-md-12" id="main_content">
+        <div class="col-md-<%=helpBoxes.isEmpty()?"12":"8"%>" id="main_content">
             <!-- Custom Tabs -->
             <div class="nav-tabs-custom">
                 <ul class="nav nav-tabs">
-                    <li class="active"><a href="#info" data-toggle="tab" aria-expanded="true"><%=add?"Agregar "+_title:"Información"%></a></li>                                        
+                    <li class=""><a href="#info" id="tab_info" data-toggle="tab" aria-expanded="true" ondblclick="loadContent('adm_cnt_iframe?<%=p%><%=(a!=null?"&a="+a:"")%>','#info')" onclick="this.onclick=undefined;this.ondblclick();"><%=add?"Agregar "+_title:"Información"%></a></li>                                        
 <%
-            if(!add)
-            {
-                Iterator<DataObject> it=childs.iterator();
-                while (it.hasNext()) {
-                    DataObject tab = it.next();       
-                    String tabType=tab.getString("type");
-                    if("ajax_content".equals(tabType))
-                    {
-                        String tabPath=tab.getString("path","");
-                        //replace special args
-                        tabPath=tabPath.replace("{id}", id);
-                        String sid[]=id.split(":");
-                        if(sid.length==4)tabPath=tabPath.replace("{ID}", sid[3]);
+        if(!add)
+        {
+            Iterator<DataObject> it=childs.iterator();
+            while (it.hasNext()) {
+                DataObject tab = it.next();       
+                if(!tab.getString("status","active").equals("active"))continue;
+                String tabType=tab.getString("type");
+                if("ajax_content".equals(tabType))
+                {
+                    String tabPath=tab.getString("path","");
+                    //replace special args
+                    tabPath=tabPath.replace("{id}", id);
+                    //String sid[]=id.split(":");
+                    //if(sid.length==4)tabPath=tabPath.replace("{ID}", sid[3]);
 %>
-                    <li class=""><a href="#<%=tab.getNumId()%>" data-toggle="tab" aria-expanded="false" ondblclick="loadContent('<%=tabPath%>','#<%=tab.getNumId()%>')" onclick="this.onclick=undefined;this.ondblclick();"><%=tab.getString("name")%></a></li>
+                    <li class=""><a href="#<%=tab.getNumId()%>" id="tab_<%=tab.getNumId()%>" data-toggle="tab" aria-expanded="false" ondblclick="loadContent('<%=tabPath%>','#<%=tab.getNumId()%>')" onclick="this.onclick=undefined;this.ondblclick();"><%=tab.getString("name")%></a></li>
 <%                    
-                    }else
-                    {
+                }else
+                {
 %>
-                    <li class=""><a href="#<%=tab.getNumId()%>" data-toggle="tab" aria-expanded="false" ondblclick="loadContent('<%=_fileName%>?pid=<%=tab.getNumId()%>&aiframe=true&id=<%=id%>','#<%=tab.getNumId()%>')" onclick="this.onclick=undefined;this.ondblclick();"><%=tab.getString("name")%></a></li>
+                    <li class=""><a href="#<%=tab.getNumId()%>" id="tab_<%=tab.getNumId()%>" data-toggle="tab" aria-expanded="false" ondblclick="loadContent('adm_cnt_iframe?<%=p%>&p=<%=tab.getNumId()%>','#<%=tab.getNumId()%>')" onclick="this.onclick=undefined;this.ondblclick();"><%=tab.getString("name")%></a></li>
 <%
-                    }
-                }   
-            }
+                }
+            }   
+        }
 %>                    
                 </ul>
-                <div class="tab-content">
-                    <div class="tab-pane active" id="info">
-                        <iframe class="ifram_content <%=pid%>" src="<%=_fileName%>?pid=<%=pid%>&iframe=true<%=(rid!=null)?("&rid="+rid):""%>&id=<%=id%>" frameborder="0" width="100%"></iframe>
-                    </div><!-- /.tab-pane -->
+                <div class="tab-content"><div class="tab-pane" id="info"><center>Loading...</center></div>
 <%
-            if(!add)
-            {
-                Iterator<DataObject> it=childs.iterator();
-                while (!add && it.hasNext()) {
-                    DataObject tab = it.next();     
-                    //System.out.println("tab:"+tab.getNumId()+" "+id);
+        if(!add)
+        {
+            Iterator<DataObject> it=childs.iterator();
+            while (!add && it.hasNext()) {
+                DataObject tab = it.next();     
+                //System.out.println("tab:"+tab.getNumId()+" "+id);
 %>
                 <div class="tab-pane" id="<%=tab.getNumId()%>"><center>Loading...</center></div><!-- /.tab-pane -->
 <%
-                }            
-            }
+            }            
+        }
 %>                    
                 </div><!-- /.tab-content -->
                 <script type="text/javascript">
-                    $(window).resize();
+                    $('#<%=t!=null?t:"tab_info"%>').trigger("click");
                 </script>                                                
             </div><!-- nav-tabs-custom -->
         </div><!-- /.col -->
+<%
+    for(String txt:helpBoxes)
+    {
+        out.println(txt);
+    }
+%>               
     </div>
 </section>
 <%
-        }
-%>
-<!-- /.content -->
-<%
-        //********************************** End Ajax ************************************************************
-    }else 
-    {
-        //********************************** IFrame Content ************************************************************
-%>
-<!DOCTYPE html>
-<html>
-    <head>
-        <title><%=_title%></title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="<%=contextPath%>/platform/js/eng.min.js?id=<%=eng.getId()%>" type="text/javascript"></script>
-        <link href="<%=contextPath%>/admin/css/sc_admin.css" rel="stylesheet" type="text/css" />
-    </head>
-    <body>
-        <script type="text/javascript">
-            eng.initPlatform("/admin/ds/datasources.js", <%=eng.getDSCache()%>);
-        </script>
-        <script type="text/javascript">
-<%  
-        if("process_tray".equals(type))
-        {
-            SWBProcess proc=eng.getProcessMgr().getProcess(obj.getString("process"));
-            DataObject initTransition=proc.getUserInitTransition(eng);
-%>             
-            var grid=eng.createGrid({
-                autoResize: true,
-                resizeHeightMargin: 20,
-                resizeWidthMargin: 15,
-                canEdit: false,
-                canAdd: <%=initTransition!=null%>,
-                canRemove: false,
-                showFilter: true,         
-                <%=getProps(extProps,request,user)%>
-<%
-            if(rid!=null)
-            {
-                DataObject pobj=eng.getDataSource("Page").getObjectById(obj.getString("parentId"));
-                String psds=pobj.getString("ds");
-                String sds=obj.getString("ds");
-                Iterator<ScriptObject> it=eng.getDataSource(sds).findScriptFields("dataSource", psds).iterator();
-                String name=null;
-                String value=rid;
-                if (it.hasNext()) {
-                    ScriptObject field = it.next();
-                    name=field.getString("name");
-                    String valueField=field.getString("valueField");
-                    if(valueField!=null)
-                    {
-                        value=eng.getDataSource(psds).getObjectById(rid,DataObject.EMPTY).getString(valueField);
-                    }
-                }
-                if(name!=null)
-                {
-                    out.println("                initialCriteria: {'"+name+"':'"+value+"'}, ");
-                }
-            }
-%>            
-                recordDoubleClick: function(grid, record)
-                {
-                    parent.loadContent("admin_process?itrn=&pid=<%=pid%>&id="+ record["_id"],".content-wrapper");
-                    return false;
-                },
-                addButtonClick: function(event)
-                {
-                    parent.loadContent("admin_process?itrn=<%=initTransition!=null?initTransition.getNumId():""%>&pid=<%=pid%>",".content-wrapper");
-                    return false;
-                },                                 
-                fields: [<%=fields%>]           
-            }, "<%=_ds%>");
-            
-            <%=parseScript(obj.getString("processAddiJS"),request,user)%>            
-<%            
-        }else if(id==null)
-        {
-            //********************************** Grid ************************************************************
-%>            
-            var grid=eng.createGrid({
-                autoResize: true,
-                resizeHeightMargin: 20,
-                resizeWidthMargin: 15,
-                canEdit: <%=eng.hasUserAnyRole(obj.getDataList("roles_update"))%>,
-                canAdd: <%=eng.hasUserAnyRole(obj.getDataList("roles_add"))%>,
-                canRemove: <%=eng.hasUserAnyRole(obj.getDataList("roles_remove"))%>,
-                showFilter: true,         
-                <%=getProps(extProps,request,user)%>
-<%
-            if(rid!=null)
-            {
-                DataObject pobj=eng.getDataSource("Page").getObjectById(obj.getString("parentId"));
-                String psds=pobj.getString("ds");
-                String sds=obj.getString("ds");
-                Iterator<ScriptObject> it=eng.getDataSource(sds).findScriptFields("dataSource", psds).iterator();
-                String name=null;
-                String value=rid;
-                if (it.hasNext()) {
-                    ScriptObject field = it.next();
-                    name=field.getString("name");
-                    String valueField=field.getString("valueField");
-                    if(valueField!=null)
-                    {
-                        value=eng.getDataSource(psds).getObjectById(rid,DataObject.EMPTY).getString(valueField);
-                    }
-                }
-                if(name!=null)
-                {
-                    out.println("                initialCriteria: {'"+name+"':'"+value+"'}, ");
-                }
-            }
-            if("sc_grid_detail".equals(type))
-            {
-                if(gd_conf.contains("inlineEdit"))
-                {
-                    fields.append(",{name: \"edit\", title: \" \", width:32, canEdit:false, formatCellValue: function (value) {return \" \";}}");
-%>
-                showRecordComponents: true,
-                showRecordComponentsByCell: true,
-                //recordComponentPoolingMode: "recycle",
-                
-                createRecordComponent: function (record, colNum) {
-                    var fieldName = this.getFieldName(colNum);
-                    
-                    if (fieldName == "edit") {
-                        var content=isc.HTMLFlow.create({
-                            width:32,
-                            height:16,
-                            contents:"<img style=\"cursor: pointer; padding: 5px 11px;\" width=\"16\" height=\"16\" src=\"<%=contextPath%>/platform/isomorphic/skins/Tahoe/images/actions/edit.png\">", 
-                            //dynamicContents:false,
-                            click: function () {
-                                parent.loadContent("<%=_fileName%>?pid=<%=pid%>&id=" + record["_id"],".content-wrapper");
-                                return false;
-                            }
-                        });
-                        return content;
-                    } else {                    
-                        return null;
-                    }
-                },                     
-<%        
-                }else
-                {
-%>                  
-                recordDoubleClick: function(grid, record)
-                {
-                    parent.loadContent("<%=_fileName%>?pid=<%=pid%><%=(rid!=null)?("&rid="+rid):""%>&id="+ record["_id"],".content-wrapper");
-                    return false;
-                },
-<%
-                }
-                if(!gd_conf.contains("inlineAdd"))
-                {
-%>                
-                addButtonClick: function(event)
-                {
-                    parent.loadContent("<%=_fileName%>?pid=<%=pid%><%=(rid!=null)?("&rid="+rid):""%>&id=",".content-wrapper");
-                    return false;
-                },                                 
-<%
-                }
-            }
-%>                
-                fields: [<%=fields%>]           
-            }, "<%=_ds%>");
-            
-            <%=parseScript(obj.getString("gridAddiJS"),request,user)%>
-<%
-            //********************************** End Grid ************************************************************    
-        }else
-        {
-            //********************************** Form ************************************************************
-            String sid = add?"null":"\"" + id + "\"";
-%>
-            var form = eng.createForm({
-                width: "100%",
-                left: "-8px",
-                title: "Información",
-                showTabs: false,
-                canPrint: false,
-                canEdit: <%=eng.hasUserAnyRole(obj.getDataList("roles_update"))%>,
-                numCols: 2,
-                colWidths: [250, "*"],
-                <%=getProps(extProps,request,user)%>
-                fields: [<%=fields%>],
-                onLoad:function()
-                {
-                    setTimeout(function(){
-                        parent.$(".<%=pid%>").attr("height", (document.body.offsetHeight+16) + "px");
-                    },0);
-                }
-            }, <%=sid%>, "<%=_ds%>");
-
-            form.submitButton.setTitle("Guardar");
-
-            form.submitButton.click = function (p1)
-            {
-                eng.submit(form, this, function ()
-                {
-                    isc.say("Datos enviados correctamente...", function () {
-                        <%if(add){%>parent.loadContent("<%=_fileName%>?pid=<%=pid%><%=(rid!=null)?("&rid="+rid):""%>&id=" + form.values._id,".content-wrapper");<%}%>
-                    });
-                });
-            };
-
-            form.buttons.addMember(isc.IButton.create({
-                title: "Regresar",
-                padding: "10px",
-                click: function (p1) {
-                    parent.loadContent("<%=_fileName%>?pid=<%=pid%><%=(rid!=null)?("&rid="+rid):""%>",".content-wrapper");
-                    return false;
-                }
-            }));
-            form.buttons.members.unshift(form.buttons.members.pop());  
-            
-            <%=parseScript(obj.getString("formAddiJS"),request,user)%>
-<%
-            //********************************** End Form ************************************************************    
-        }
-%>    
-        </script>         
-    </body>
-</html>
-<%
-        //********************************** Enf IFrame Content ************************************************************
-
     }
-%>
+%>    
+<!-- /.content -->
+

@@ -87,8 +87,7 @@
         <title><%=_title%></title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="<%=contextPath%>/platform/js/eng.js?id=<%=eng.getId()%>" type="text/javascript"></script>
-        <link href="<%=contextPath%>/admin/css/sc_admin.css" rel="stylesheet" type="text/css" />
+        <%@include file="adm_sc_head.jsp"%>
     </head>
     <body>
         <script type="text/javascript">
@@ -206,19 +205,17 @@
                 hasType:function(type)
                 {                    
                     var val=this.getValue('type')
+                    if(!val)return true;
                     if(typeof type === "string")
                     {
-                        return val && val.indexOf(type)>-1;
+                        return val.indexOf(type)>-1;
                     }else if(typeof type === "object")
                     {                        
-                        if(val)
-                        {
-                            //console.log(type);
-                            for(var i=0;i<type.length;i++)
-                            {                                
-                                if(val.indexOf(type[i])>-1)return true;
-                            }                            
-                        }    
+                        //console.log(type);
+                        for(var i=0;i<type.length;i++)
+                        {                                
+                            if(val.indexOf(type[i])>-1)return true;
+                        }                            
                         return false;
                     }
                     return true;
@@ -237,12 +234,12 @@
                     {name: "roles_view", width:"100%"},
                     {name: "status"},                    
                     {name: "path", width:"100%", showIf:"form.hasType(['ajax','iframe','url'])"},
+                    {name: "engine", showIf:"form.hasType(['sc','process'])"},
                     {name: "ds", showIf:"form.hasType('sc')"},
                     {name: "process", showIf:"form.hasType('process')"},
                     
-                    {name: "gd_conf", showIf:"form.hasType('sc_grid_detail')"},
-                    {name: "gridProps", width:"100%", showIf:"form.hasType(['sc_grid','process'])"},
-                    {name: "gridExtProps", width:"100%", showIf:"form.hasType(['sc_grid','process'])", editByCell:true,
+                    {name: "searchProps", width:"100%", showIf:"form.hasType(['sc_search_detail'])"},
+                    {name: "searchExtProps", width:"100%", showIf:"form.hasType(['sc_search_detail'])", editByCell:true,
                         getEditorProperties:function(editField, editedRecord, rowNum) {
                             if (editField.name == "value")
                             {
@@ -259,27 +256,49 @@
                             return null;
                         }, 
                     },
-                    {name: "gridAddiJS", showIf:"form.hasType('sc_grid')"},
-                    {name: "formProps", width:"100%", showIf:"form.hasType(['sc_grid_detail','sc_form','process'])"},
-                    {name: "formExtProps", width:"100%", showIf:"form.hasType(['sc_grid_detail','sc_form','process'])", editByCell:true,
-                        getEditorProperties:function(editField, editedRecord, rowNum) {
-                            if (editField.name == "value")
-                            {
-                                if(editedRecord!=null) {
-                                    var item=ds_field_atts_vals[editedRecord.att];
-                                    editField._lastItem=item;
-                                    //console.log(item);                                    
-                                    return item;
-                                }else
-                                {
-                                    return editField._lastItem;
-                                }
-                            } 
-                            return null;
-                        }, 
-                    },
-                    {name: "formAddiJS", showIf:"form.hasType(['sc_grid_detail','sc_form','process'])"},
+                    {name: "searchAddiJS", showIf:"form.hasType(['sc_search_detail'])"},                    
                     
+                    {name: "gd_conf", showIf:"form.hasType(['sc_grid_detail','sc_search_detail','sc_fulltext_search_detail'])"},
+                    {name: "gridProps", width:"100%", showIf:"form.hasType(['sc_grid','process','sc_search_detail','sc_fulltext_search_detail'])"},
+                    {name: "gridExtProps", width:"100%", showIf:"form.hasType(['sc_grid','process','sc_search_detail','sc_fulltext_search_detail'])", editByCell:true,
+                        getEditorProperties:function(editField, editedRecord, rowNum) {
+                            if (editField.name == "value")
+                            {
+                                if(editedRecord!=null) {
+                                    var item=ds_field_atts_vals[editedRecord.att];
+                                    editField._lastItem=item;
+                                    //console.log(item);                                    
+                                    return item;
+                                }else
+                                {
+                                    return editField._lastItem;
+                                }
+                            } 
+                            return {};
+                        }, 
+                    },
+                    {name: "gridAddiJS", showIf:"form.hasType(['sc_grid','sc_search_detail','sc_fulltext_search_detail'])"},
+                    {name: "formProps", width:"100%", showIf:"form.hasType(['sc_grid_detail','sc_form','process','sc_search_detail','sc_fulltext_search_detail'])"},
+                    {name: "formExtProps", width:"100%", showIf:"form.hasType(['sc_grid_detail','sc_form','process','sc_search_detail','sc_fulltext_search_detail'])", editByCell:true,
+                        getEditorProperties:function(editField, editedRecord, rowNum) {
+                            if (editField.name == "value")
+                            {
+                                if(editedRecord!=null) {
+                                    var item=ds_field_atts_vals[editedRecord.att];
+                                    editField._lastItem=item;
+                                    //console.log(item);                                    
+                                    return item;
+                                }else
+                                {
+                                    return editField._lastItem;
+                                }
+                            } 
+                            return {};
+                        }, 
+                    },
+                    {name: "formAddiJS", showIf:"form.hasType(['sc_grid_detail','sc_form','process','sc_search_detail','sc_fulltext_search_detail'])"},                                        
+                    {name: "contextBox", width:"100%"},
+                    {name: "helpBox", width:"100%", showIf:"form.hasType(['detail'])"},
                     {name: "roles_add", width:"100%", showIf:"form.hasType('sc')"},
                     {name: "roles_update", width:"100%", showIf:"form.hasType('sc')"},
                     {name: "roles_remove", width:"100%", showIf:"form.hasType('sc')"},

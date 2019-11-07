@@ -121,7 +121,7 @@ var loadContent = function (url, target, data, callback, historyUrl)
                     );
             $(target).tree();
             if (callback)
-                callback();
+                callback(data);
         });
     }    
 }

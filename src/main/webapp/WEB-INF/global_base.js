@@ -36,10 +36,11 @@ eng.config = {
 eng.dataStores["mongodb"] = {
     host: "localhost",
     port: 27017,
-    //clientURI="mongodb://user1:pwd1@host1/?authSource=db1&ssl=true",          //Connection by clientURI
-    //envHost="host";                                                           //host defined by enviroment variable
-    //envPort="port";                                                           //port defined by enviroment variable
-    //envClientURI="clientURI";                                                 //clientURI defined by enviroment variable
+    //clientURI="mongodb://user1:pwd1@host1/?authSource=db1&ssl=true",                              //Connection by clientURI
+    //clientURI: "mongodb://XXXXXXXX.documents.azure.com:10255/?ssl=true&replicaSet=globaldb",      //cosmosDB
+    //envHost="host";                                                                               //host defined by enviroment variable
+    //envPort="port";                                                                               //port defined by enviroment variable
+    //envClientURI="clientURI";                                                                     //clientURI defined by enviroment variable
     class: "org.semanticwb.datamanager.datastore.DataStoreMongo",
 };
 
@@ -242,7 +243,24 @@ eng.dataProcessors["DefPropertiesProcessor"] = {
                         if(j>-1)request.data[fs[i].getString("name")]=t.substring(0,j);
                     }
                 }
-            }            
+            }   
+            {
+                var fs = ds.findScriptFields("validators", "type", "isUnique");
+                for (var i = 0; i < fs.size(); i++)
+                {
+                    var prop=fs[i].getString("name");
+                    var val=request.data[prop];
+                    if(val)
+                    {
+                        var id=request.data._id;
+                        var obj=this.getDataSource(dataSource).fetchObjByProp(prop,val);
+                        if(obj!=null && !obj._id.equals(id))
+                        {
+                            throw "Error "+fs[i].getString("title")+": "+org.semanticwb.datamanager.DataUtils.getArrayNode(fs[i].get("validators"), "type", "isUnique").getString("errorMessage");
+                        }
+                    }
+                }                
+            }
             if (request.data._swbf_processAction !== null)
             {
                 var err=this.getProcessMgr().processAction(this,request.data,trxParams);

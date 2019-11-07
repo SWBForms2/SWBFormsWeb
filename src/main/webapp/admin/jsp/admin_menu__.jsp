@@ -47,14 +47,14 @@
                 out.println("<li class=\"\"><a class=\"cdino_text_menu\" href=\""+(path.startsWith("/")?contextPath+path:path)+"\"><i class=\""+iconClass+"\"></i>"+name+"</a></li>");
             }else
             {
-                if("sc_grid".equals(type))path="admin_content?p="+obj.getNumId();
-                if("sc_grid_detail".equals(type))path="admin_content?p="+obj.getNumId();
-                if("sc_fulltext_search_detail".equals(type))path="admin_content?p="+obj.getNumId();
-                if("sc_search_detail".equals(type))path="admin_content?p="+obj.getNumId();
-                if("sc_form".equals(type))path="admin_content?p="+obj.getNumId();
-                if("iframe_content".equals(type))path="admin_content?p="+obj.getNumId();
-                if("ajax_content".equals(type))path="admin_content?p="+obj.getNumId();
-                if("process_tray".equals(type))path="admin_content?p="+obj.getNumId();
+                if("sc_grid".equals(type))path="admin_content?pid="+obj.getNumId();
+                if("sc_grid_detail".equals(type))path="admin_content?pid="+obj.getNumId();
+                if("sc_fulltext_search_detail".equals(type))path="admin_content?pid="+obj.getNumId();
+                if("sc_search_detail".equals(type))path="admin_content?pid="+obj.getNumId();
+                if("sc_form".equals(type))path="admin_content?pid="+obj.getNumId();
+                if("iframe_content".equals(type))path="admin_content?pid="+obj.getNumId();
+                if("ajax_content".equals(type))path="admin_content?pid="+obj.getNumId();
+                if("process_tray".equals(type))path="admin_content?pid="+obj.getNumId();
                 
                 String urlParams=obj.getString("urlParams","");
                 if(urlParams.length()>0)

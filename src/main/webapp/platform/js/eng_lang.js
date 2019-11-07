@@ -99,6 +99,7 @@ eng.fieldProcesors["select"] = function(field)
         
     //if(!base.editorProperties.allowEmptyValue)base.editorProperties.allowEmptyValue=true;
     //if(!base.editorProperties.canSelectText)base.editorProperties.canSelectText=true;
+    if(!base.editorProperties.addUnknownValues)base.editorProperties.addUnknownValues=false; 
         
     if(!base.editorProperties.sortField){
         if(base.editorProperties.sortField===null){
@@ -757,6 +758,8 @@ eng.fieldProcesors["html"] = function(field)
         base.colSpan = 5;
     if (!base.showTitle)
         base.showTitle=true;
+    if (!base.controlGroups)
+        base.controlGroups=["fontControls", "formatControls", "styleControls", "colorControls", "bulletControls"];
     return base;
 };
 
@@ -1407,7 +1410,7 @@ isc.FileUpload.addProperties({
         
         if(this.isEditable())content="<button onclick=\""+this.ID+"_button.click()\">Cargar Archivo</button>"+content;
         //content = "<div style=\"width:100%; height:18px; overflow:hidden;\">"+content+"</div>";
-        content = "<div style=\"width:100%; height:18px;\">"+content+"</div>";
+        content = "<div style=\"height:18px;\">"+content+"</div>";
         this.canvas.setContents(content);
         
         //console.log(dataValue);  

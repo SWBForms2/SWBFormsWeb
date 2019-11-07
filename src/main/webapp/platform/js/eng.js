@@ -1,7 +1,7 @@
 window.isomorphicDir= "/platform/isomorphic/";
 
 var eng = {    
-    staticVersion: "v0001",
+    staticVersion: "v1200",
     
     operationBindings: [
         {operationType: "fetch", dataProtocol: "postMessage"},
@@ -957,8 +957,8 @@ var eng = {
                     win.form.fromGrid = grid;
                 }                                    
             };            
-        }            
-            
+        }    
+        
         var grid;
 
         if(base.gridType==="TreeGrid")
@@ -968,6 +968,25 @@ var eng = {
         {
             grid = isc.ListGrid.create(base);
         }
+        
+        //validate enables
+        {
+            var _canEditCell=grid.canEditCell;
+            grid.canEditCell=function(rowNum, colNum) 
+            {       
+                var record = this.getRecord(rowNum);
+                //var fieldName = this.getFieldName(colNum);
+                //console.log(this,record,fieldName);                
+                var mode=this.getField(colNum).canEditModes;
+                if(mode)
+                {
+                    
+                    if(record && mode.indexOf("update")==-1)return false;
+                    if(!record && mode.indexOf("add")==-1)return false;
+                }
+                return _canEditCell.call(grid,rowNum, colNum);
+            }
+        }          
 
         if(base.canAdd===true)
         {
@@ -1318,6 +1337,20 @@ var eng = {
         
         eng.addLinks(ds.links,tabs,tab,pane,form);
         
+        //validate enables
+        {
+            var items=form.getItems();
+            for(var i=0;i<items.length;i++)
+            {
+                var mode=items[i].canEditModes;
+                if(mode)
+                {
+                    if((fetchId && fetchId != null) && mode.indexOf("update")==-1)items[i].setEnabled(false);
+                    if(!(fetchId && fetchId != null) && mode.indexOf("add")==-1)items[i].setEnabled(false);
+                }
+            }
+        }
+        
         if (fetchId && fetchId != null)
         {
             eng.fetchForm(form, {_id: fetchId}, function()
@@ -1326,7 +1359,7 @@ var eng = {
                 if(base.onLoad)base.onLoad(form);
             });
         }else
-        {        
+        {
             if(form.tabs)form.tabs.tabSelected();
             if(base.onLoad)base.onLoad(form);
         }
@@ -2231,7 +2264,7 @@ var eng = {
             
             if(_isc)
             {
-                if(_isc_load)
+                if(_isc_load && typeof isc === 'undefined')
                 {
                     eng.utils.loadJS(isomorphicDir+"system/modules/ISC_Core.js",false,cache,true,eng.staticVersion);
                     eng.utils.loadJS(isomorphicDir+"system/modules/ISC_Foundation.js",false,cache,true,eng.staticVersion);
@@ -2249,6 +2282,7 @@ var eng = {
                 isc.DateItem.DEFAULT_START_DATE.setYear(1900);
             
                 isc.Canvas.resizeControls(10);            
+                isc.Canvas.resizeFonts(3);                        
                 
                 Page.setEvent("load",function(){
                     //isc.Canvas.resizeFonts(3);                        
@@ -2259,7 +2293,7 @@ var eng = {
                 NumberUtil.decimalSymbol=".";
                 NumberUtil.groupingSymbol=",";              
             
-                eng.utils.loadJS(eng.contextPath + "/platform/js/eng_lang.js",false,cache,true, eng.staticVersion);
+                eng.utils.loadJS(eng.contextPath + "/platform/js/eng_lang.min.js",false,cache,true, eng.staticVersion);
             }
             //console.log("window.location.pathname",window.location.pathname);
             if(typeof file === 'string')

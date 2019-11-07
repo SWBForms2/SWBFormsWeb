@@ -195,8 +195,7 @@
         <title><%=transition.getString("name")%></title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script src="<%=contextPath%>/platform/js/eng.js?id=1563926412621" type="text/javascript"></script>
-        <link href="<%=contextPath%>/admin/css/sc_admin.css" rel="stylesheet" type="text/css" />
+        <%@include file="adm_sc_head.jsp"%>
     </head>
     <body>
         <script type="text/javascript">

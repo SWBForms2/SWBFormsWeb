@@ -2222,10 +2222,12 @@ var eng = {
             var src=scripts[x].src;
             if(src)
             {
-                var i=src.indexOf("eng.js?id=");
-                if(i>-1)
+                var i=src.indexOf("/eng.");
+                var j=src.indexOf("?id=");
+                if(i>-1 && j>-1)
                 {
-                    eng.id=src.substring(i+10);
+                    //console.log(src);
+                    eng.id=src.substring(j+4);
                     eng.contextPath=src.substring(src.indexOf("/",8),src.indexOf("/platform/"));
                     isomorphicDir=eng.contextPath+isomorphicDir;
                     //console.log("eng.contextPath",eng.contextPath);
@@ -2282,7 +2284,7 @@ var eng = {
                 isc.DateItem.DEFAULT_START_DATE.setYear(1900);
             
                 isc.Canvas.resizeControls(10);            
-                isc.Canvas.resizeFonts(3);                        
+                isc.Canvas.resizeFonts(1);                        
                 
                 Page.setEvent("load",function(){
                     //isc.Canvas.resizeFonts(3);                        

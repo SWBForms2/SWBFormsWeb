@@ -3,6 +3,9 @@
     Created on : 23-oct-2019, 18:37:30
     Author     : javiersolis
 --%>
+<%@page import="java.net.URLEncoder"%>
+<%@page import="java.util.HashMap"%>
+<%@page import="java.util.Map"%>
 <%@page import="org.semanticwb.datamanager.script.ScriptObject"%>
 <%@page import="java.util.Iterator"%>
 <%@page import="java.io.IOException"%>
@@ -84,9 +87,49 @@
         pid=pid.substring(0,i);
     }   
     
+    //Find extra parameters
+    Map<String,String[]> pmap=new HashMap();
+    pmap.putAll(request.getParameterMap());    
+    pmap.remove("t");
+    pmap.remove("a");
+    pmap.remove("p");
+    pmap.remove("id");
+    StringBuilder extp=new StringBuilder();
+    Iterator<String> eit=pmap.keySet().iterator();
+    while (eit.hasNext()) {
+        String key = eit.next();
+        String vals[]=pmap.get(key);
+        for(String val:vals)
+        {
+            extp.append(key);
+            extp.append("=");
+            extp.append(URLEncoder.encode(val,"UTF-8"));
+        }
+    }    
+    
     DataObject obj=eng.getDataSource("Page").getObjectByNumId(pid);   
     String type=obj.getString("type"); 
     String _path=obj.getString("path","");
+    
+    if(_path.length()>0)
+    {
+        String id2=id;    
+        if(id2==null && paths.size()>1)
+        {        
+            String pid2=paths.get(paths.size()-2);
+            int i2=pid2.indexOf(":");
+            if(i2>-1)
+            {
+                id2=pid2.substring(i2+1);
+                pid2=pid2.substring(0,i2);
+            } 
+        }        
+        _path=_path.replace("{id}", id2);
+    }
+
+    //add context
+    _path=_path.startsWith("/")?contextPath+_path:_path;    
+    if(extp.length()>0 && _path.length()>0)_path=_path.indexOf("?")>-1?_path+"&"+extp:_path+"?"+extp;    
     
     if(!type.equals("iframe_content"))
     {

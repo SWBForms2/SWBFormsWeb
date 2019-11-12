@@ -7,12 +7,23 @@
     SWBScriptEngine eng=DataMgr.initPlatform("/admin/ds/datasources.js", session);
     DataObject user=eng.getUser();    
     String id=request.getParameter("id");
+    if(id==null)
+    {
+%>
+<div>
+   Alta de usuario
+</div>
+<%       
+        return;
+    }
     DataObject obj=eng.getDataSource("User").getObjectByNumId(id);
     if(obj==null)
     {
         response.sendError(404);
         return;
     }
+    eng.getDataSource("voc_tipo_atencion").fetchObjByProp("id", obj.getString("tipo_atencion_id"),DataObject.EMPTY);
+    //obj.getDateFormated(key, format)
 %>
 <div>
     Usuario: <b><%=obj.getString("fullname")%></b><br>    

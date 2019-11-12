@@ -165,6 +165,7 @@
     if(isMultipart)
     {   
         SWBDataSource ds=eng.getDataSource(ds_s);
+/*        
         // Create a factory for disk-based file items
         DiskFileItemFactory factory = new DiskFileItemFactory();
 
@@ -176,11 +177,22 @@
         // Create a new file upload handler
         ServletFileUpload upload = new ServletFileUpload(factory);
 
+
         // Parse the request
         List<FileItem> items = upload.parseRequest(request);
         for(FileItem item:items)
         {
+*/
+        // Create a new file upload handler
+        ServletFileUpload upload = new ServletFileUpload();
+
+        // Parse the request
+        FileItemIterator iter = upload.getItemIterator(request);
+        while(iter.hasNext())
+        {
+            FileItemStream item = iter.next();
             if (!item.isFormField()) {
+/*                
                 String value = item.getName();
                 value = value.replace("\\", "/");
                 int pos = value.lastIndexOf("/");
@@ -192,9 +204,10 @@
                 //System.out.println("item 1:"+item);
                 //String txt=DataUtils.readInputStream(item.getInputStream());
                 //System.out.println("txt:"+txt);     
+*/                
                 
-                
-                Reader in = new InputStreamReader(item.getInputStream(),"UTF-8");
+                //Reader in = new InputStreamReader(item.getInputStream(),"UTF-8");
+                Reader in = new InputStreamReader(item.openStream(),"UTF-8");
                 CSVRecord dataNames=null;
                 CSVRecord dataTitles=null;
                 Iterable<CSVRecord> records = CSVFormat.EXCEL.parse(in);

@@ -114,12 +114,13 @@
             }   
             
             //contextBoxes
-            if(!last)
+            //if(!last)
             {
                 String contextBox=obj.getString("contextBox","").trim();
                 if(!contextBox.isEmpty())
                 {
-                    contextBox=request.getContextPath()+contextBox+"?id="+id;
+                    contextBox=request.getContextPath()+contextBox;
+                    if(id!=null)contextBox+="?id="+id;
                     StringBuilder txt=new StringBuilder();
                     txt.append("<div id=\"pg_"+obj.getNumId()+"\" class=\"col-md-4 callout callout-info lead\">");                    
                     txt.append("</div>"); 
@@ -184,6 +185,7 @@
           || "sc_grid_detail".equals(type)
           || "sc_fulltext_search_detail".equals(type)
           || "sc_search_detail".equals(type)
+          || "sc_form".equals(type)
         )fname="sc_grid";
         return "adm_cnt_"+fname+"?"+getParams(paths);        
     }
@@ -244,11 +246,20 @@
     String _fileName="admin_content";
     String type=obj.getString("type");
     
-    if(id!=null && _path.length()>0)
+    if(_path.length()>0)
     {
-        _path=_path.replace("{id}", id);
-        //String sid[]=id.split(":");
-        //if(sid.length==4)_path=_path.replace("{ID}", sid[3]);    
+        String id2=id;    
+        if(id2==null && paths.size()>1)
+        {        
+            String pid2=paths.get(paths.size()-2);
+            int i2=pid2.indexOf(":");
+            if(i2>-1)
+            {
+                id2=pid2.substring(i2+1);
+                pid2=pid2.substring(0,i2);
+            } 
+        }        
+        _path=_path.replace("{id}", id2);
     }
     
     //add context

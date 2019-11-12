@@ -251,7 +251,7 @@
     {
         extProps=getExtProps(obj,"gridExtProps",eng);
         fields=getFields(obj, "gridProps", extProps, eng, add);
-    }else if(!add && id==null)
+    }else if(!add && id==null && !"sc_form".equals(type))
     {
         extProps=getExtProps(obj,"gridExtProps",eng);
         fields=getFields(obj, "gridProps", extProps, eng, add);
@@ -317,7 +317,7 @@
         </script>
         <script type="text/javascript">            
 <%
-        if(!add && id==null)
+        if(!add && id==null && !"sc_form".equals(type))
         {
            if("sc_search_detail".equals(type))
             {
@@ -332,16 +332,18 @@
                 canPrint: false,
                 showTabs: false,
                 numCols: 4,
-                colWidths: [250, "*"],                                
+                colWidths: [250, "*"],   
                 <%=getProps(searchExtProps,request,user)%>
                 fields: [<%=searchFields%>]   
             }, null, "<%=_ds%>");
             
-            form.submitButton.setTitle("Filtrar");
-            form.submitButton.click = function (p1 )
-            {
-                grid.filterData(form.getValuesAsCriteria());
-            };    
+            if(form.submitButton){
+                form.submitButton.setTitle("Filtrar");
+                form.submitButton.click = function (p1 )
+                {
+                    grid.filterData(form.getValuesAsCriteria());
+                };    
+            }
 <%                
             }else if("sc_fulltext_search_detail".equals(type))
             {
@@ -448,9 +450,11 @@
                 autoComplete: "off",
                 showTabs: false,
                 canPrint: false,
-                canEdit: <%=eng.hasUserAnyRole(obj.getDataList("roles_update"))%>,
+                canEdit: <%=(eng.hasUserAnyRole(obj.getDataList("roles_update")) || (eng.hasUserAnyRole(obj.getDataList("roles_add")) && add))%>,
                 numCols: 2,
                 colWidths: [250, "*"],
+                requiredTitlePrefix: "<b>* ",
+                requiredTitleSuffix: "</b>",                
                 <%=getProps(extProps,request,user)%>
                 fields: [<%=fields%>],
                 <%if(linkProp!=null){out.println("values: {'"+linkProp+"':'"+linkValue+"'},");}%>
@@ -462,17 +466,18 @@
                 }
             }, <%=sid%>, "<%=_ds%>");
 
-            form.submitButton.setTitle("Guardar");
-
-            form.submitButton.click = function (p1)
-            {
-                eng.submit(form, this, function ()
+            if(form.submitButton){
+                form.submitButton.setTitle("Guardar");
+                form.submitButton.click = function (p1)
                 {
-                    isc.say("Datos enviados correctamente...", function () {                        
-                        <%if(add){%>parent.loadContent("<%=_fileName%>?<%=p%>&id=" + form.values._id,".content-wrapper");<%}%>
+                    eng.submit(form, this, function ()
+                    {
+                        isc.say("Datos enviados correctamente...", function () {                        
+                            <%if(add){%>parent.loadContent("<%=_fileName%>?<%=p%>&id=" + form.values._id,".content-wrapper");<%}%>
+                        });
                     });
-                });
-            };
+                };
+            }
 
             form.buttons.addMember(isc.IButton.create({
                 title: "Regresar",

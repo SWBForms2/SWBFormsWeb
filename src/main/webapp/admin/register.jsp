@@ -66,7 +66,7 @@
                         <span class="glyphicon glyphicons-user form-control-feedback"></span>
                     </div>
                     <div class="form-group has-feedback">
-                        <input type="email" name="email" class="form-control" placeholder="Correo Electrónico" data-remote="/validator/email" data-error="El correo electrónico ya esta en uso" required/>
+                        <input type="email" name="email" class="form-control" placeholder="Correo Electrónico" data-remote="<%=contextPath%>/validator/email" data-error="El correo electrónico ya esta en uso" required/>
                         <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
                         <div class="help-block with-errors"></div>
                     </div>

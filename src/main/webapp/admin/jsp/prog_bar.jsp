@@ -132,13 +132,13 @@
                 <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
-                <li><a href="editor?id=admin&iframe=true" data-history="#editor_admin" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>Admin</a></li>
-                <li><a href="editor?id=admin_ds&iframe=true" data-history="#editor_ds" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>Admin/ds</a></li>
-                <li><a href="editor?id=admin_jsp&iframe=true" data-history="#editor_jsp" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>Admin/jsp</a></li>
-                <li><a href="editor?id=api&iframe=true" data-history="#editor_api" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>API</a></li>
-                <li><a href="editor?id=utils&iframe=true" data-history="#editor_utils" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>Utils</a></li>
-                <li><a href="editor?id=work&iframe=true" data-history="#editor_work" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>Work</a></li>
-                <li><a href="editor?id=web-inf&iframe=true" data-history="#editor_work" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>WEB-INF</a></li>
+                <li><a href="editor?id=admin&iframe=true" data-history="#editor_admin" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-folder-open"></i>Admin</a></li>
+                <li><a href="editor?id=admin_ds&iframe=true" data-history="#editor_ds" data-target=".content-wrapper" data-load="ajax">&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-folder"></i>ds</a></li>
+                <li><a href="editor?id=admin_jsp&iframe=true" data-history="#editor_jsp" data-target=".content-wrapper" data-load="ajax">&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-folder"></i>jsp</a></li>
+                <li><a href="editor?id=api&iframe=true" data-history="#editor_api" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-folder"></i>API</a></li>
+                <li><a href="editor?id=utils&iframe=true" data-history="#editor_utils" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-folder"></i>Utils</a></li>
+                <li><a href="editor?id=work&iframe=true" data-history="#editor_work" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-folder-open"></i>Work</a></li>
+                <li><a href="editor?id=web-inf&iframe=true" data-history="#editor_work" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-folder"></i>WEB-INF</a></li>
             </ul>
         </li>
     </ul>

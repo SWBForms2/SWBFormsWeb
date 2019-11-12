@@ -2,7 +2,7 @@
     Document   : dataSourceEditor.jsp
     Created on : Feb 4, 2014, 4:33:43 PM
     Author     : javier.solis.g
---%><%@page import="org.semanticwb.datamanager.*"%><%@page import="java.io.*"%><%@page import="java.net.URLEncoder"%><%@page contentType="text/html" pageEncoding="UTF-8"%><%!
+--%><%@page import="java.util.Arrays"%><%@page import="org.semanticwb.datamanager.*"%><%@page import="java.io.*"%><%@page import="java.net.URLEncoder"%><%@page contentType="text/html" pageEncoding="UTF-8"%><%!
     byte[] readInputStream(InputStream in) throws IOException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -261,6 +261,7 @@
                     boolean fselected = false;
                     File d = new File(dir);
                     File[] files = d.listFiles();
+                    Arrays.sort(files);
                     for (int x = 0; files!=null && x < files.length; x++) {
                         if (filename != null && filename.equals(files[x].getName())) {
                             selected = "selected";

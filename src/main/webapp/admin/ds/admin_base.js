@@ -39,6 +39,7 @@ var ds_field_atts_vals={
     canEditModes:{type:"string", editorType:"SelectOtherItem", multiple:true, valueMap:{"add":"Add", "update":"Update"}},    
     canEditRoles:{type:"string", editorType:"SelectOtherItem", multiple:true, valueMap:roles},    
     canFilter:{type:"boolean"},
+    canViewModes:{type:"string", editorType:"SelectOtherItem", multiple:true, valueMap:{"add":"Add", "update":"Update"}},    
     canViewRoles:{type:"string", editorType:"SelectOtherItem", multiple:true, valueMap:roles}, 
     changed:{type:"string", length: 500},
     dataSource:{type:"string", editorType:"SelectOtherItem", valueMap:[]},                            //se llena al final
@@ -274,7 +275,7 @@ eng.dataSources["ValueMap"] = {
     dataStore: _dataStore,
     displayField: "id",
     fields: [
-        {name: "id", title: "Identificador", type: "string"},//, validators: [{stype: "unique"},{stype: "id"}]},
+        {name: "id", title: "Identificador", type: "string", validators: [{stype: "id"}], required: true},
         {name: "values", title: "Valores", stype: "grid",  dataSource:"ValueMapValues"},        
         {name: "created", title: "Fecha de Registro", type: "date", editorType: "StaticTextItem", canEdit: false},
         {name: "creator", title: "Usuario Creador", type: "string", editorType: "StaticTextItem", canEdit: false},
@@ -403,7 +404,7 @@ eng.dataSources["DataProcessor"] = {
         {name: "id", title: "Identificador", type: "string", validators: [{stype: "unique"},{stype: "id"}]},
         {name: "description", title: "Descripción", type: "string"},
         {name: "dataSources", title: "DataSources",  multiple:true, type: "selectOther", valueMap:ds_dataSources},        
-        {name: "actions", title: "Actions", type: "select",  multiple:true, valueMap:["fetch","add","update","remove"]},        
+        {name: "actions", title: "Actions", type: "select",  multiple:true, valueMap:{"fetch":"fetch","add":"add","update":"update","remove":"remove"}},        
         {name: "order", title: "Orden", type:"integer", canEdit:"true", hidden:"false"},
         {name: "active", title: "Active", type:"boolean"},
         {name: "request", title: "Request", stype: "text"},
@@ -429,6 +430,43 @@ eng.dataProcessors["DataProcessorProcessor"] = {
         {        
             if(request.data.request){var txt=seng.compile(request.data.request);if(txt!=null)throw txt;}
             if(request.data.response){var txt=seng.compile(request.data.response);if(txt!=null)throw txt;}
+        }        
+        return request;
+    },
+};
+
+eng.dataSources["FormProcessor"] = {
+    scls: "FormProcessor",
+    modelid: _modelid,
+    dataStore: _dataStore,
+    displayField: "id",
+    fields: [
+        {name: "id", title: "Identificador", type: "string", validators: [{stype: "unique"},{stype: "id"}]},
+        {name: "description", title: "Descripción", type: "string"},
+        {name: "dataSources", title: "DataSources",  multiple:true, type: "selectOther", valueMap:ds_dataSources},        
+        {name: "actions", title: "Actions", type: "select",  multiple:true, valueMap:{"init":"Init","change":"Change"}},        
+        {name: "order", title: "Orden", type:"integer", canEdit:"true", hidden:"false"},
+        {name: "active", title: "Active", type:"boolean"},
+        {name: "request", title: "Request", stype: "text"},
+        {name: "created", title: "Fecha de Registro", type: "date", editorType: "StaticTextItem", canEdit: false},
+        {name: "creator", title: "Usuario Creador", type: "string", editorType: "StaticTextItem", canEdit: false},
+        {name: "updated", title: "Ultima Actualización", type: "date", editorType: "StaticTextItem", canEdit: false},
+        {name: "updater", title: "Usuario Ultima Actualización", type: "string", editorType: "StaticTextItem", canEdit: false},
+    ],
+    //security:{"fetch":{"roles":["prog"]}, "add":{"roles":["prog"]}, "update":{"roles":["prog"]}, "remove":{"roles":["prog"]}},
+};
+
+eng.dataProcessors["FormProcessorProcessor"] = {
+    dataSources: ["FormProcessor"],
+    actions: ["add","update"],
+    request: function (request, dataSource, action, trxParams)
+    {
+        if(action=="add")
+        {
+            if(!request.data.request)request.data.request="function(request, dataSource, action, trxParams){\n    //your code\n    return request;\n}";
+        }else
+        {        
+            if(request.data.request){var txt=seng.compile(request.data.request);if(txt!=null)throw txt;}
         }        
         return request;
     },
@@ -525,6 +563,7 @@ eng.dataSources["Page"] = {
         {name: "order", title: "Orden", type:"integer", canEdit:"true", hidden:"false"},
         {name: "urlParams", title: "Extra URLParams", type:"string", canEdit:"true", hidden:"false"},
         {name: "roles_view", title: "Roles de Acceso", type: "select", multiple:true, valueMap:roles},
+        {name: "script_view", title: "Script de Acceso", hint:"function(obj, page, eng){\n    //Your server code...\n    return true;\n}", showHintInField:"true", stype: "text"},
         {name: "path", title: "Ruta del Archivo", type: "string"},        
         //{name: "ds", title: "DataSource", type: "select", editorType: "ComboBoxItem", valueMap:dataSourcesMap},
         {name: "engine", title: "ScriptEngine", type: "string", defaultValue:"/admin/ds/datasources.js"},                
@@ -551,6 +590,7 @@ eng.dataSources["Page"] = {
         }},
         {name: "formExtProps", title: "Propiedades Extendidas de la Forma", stype: "grid", canReorderRecords:true, dataSource:"PageProps"},
         {name: "formAddiJS", title: "JScript Adicionales a la Forma", stype: "text"},
+        {name: "formProcessor", title: "Form Processor", hint:"function(request, dataSource, action, eng, path){\n    //Your server code...\n    return request;\n}", showHintInField:"true", stype: "text"},
         
         {name: "process", title: "Proceso", stype: "select", dataSource:"SWBF_Process", changed:function(form,item,value){
             this.form.clearValue('gridProps');
@@ -611,7 +651,7 @@ eng.dataSources["ScriptDataSourceField"]={
 };
 
 eng.dataServices["ReloadScriptEngineService"] = {
-    dataSources: ["DataSource","DataSourceFields","DataSourceFieldsExt","DataSourceIndex","DataSourceIndexFields","ValueMap","ValueMapValues","Validator","ValidatorExt","DataProcessor", "DataService", "DataExtractor","GlobalScript"],
+    dataSources: ["DataSource","DataSourceFields","DataSourceFieldsExt","DataSourceIndex","DataSourceIndexFields","ValueMap","ValueMapValues","Validator","ValidatorExt","DataProcessor","FormProcessor", "DataService", "DataExtractor","GlobalScript"],
     actions:["add", "update","remove"],
     order:100000,
     service: function(request, response, dataSource, action, trxParams)

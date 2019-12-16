@@ -67,6 +67,7 @@
             </a>
             <ul class="treeview-menu">
                 <li><a href="prog_ds" data-history="#prog_ds" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>DataSources</a></li>
+                <li><a href="prog_dp" data-history="#prog_dp" data-target=".content-wrapper" data-load="ajax">&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-gear"></i>DataProperties</a></li>
                 <li><a href="prog_vm" data-history="#prog_vm" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>ValueMaps</a></li>
                 <li><a href="prog_valid" data-history="#prog_valid" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>Validators</a></li>
                 <li><a href="prog_gscript" data-history="#prog_gscript" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>GlobalScripts</a></li>
@@ -74,6 +75,7 @@
                 <li><a href="prog_dproc" data-history="#prog_dproc" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>DataProcessors</a></li>
                 <li><a href="prog_dsrv" data-history="#prog_dsrv" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>DataServices</a></li>
                 <li><a href="prog_dext" data-history="#prog_dext" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>DataExtractors</a></li>
+                <li><a href="prog_fproc" data-history="#prog_fproc" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>FormProcessors</a></li>
             </ul>
             
             <a href="#">
@@ -94,6 +96,7 @@
             <ul class="treeview-menu">
                 <!--<li><a href="user_histories" data-history="#user_histories" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>User Histories</a></li>-->
                 <li><a href="uml_entity" data-history="#uml" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>Entity Diagram</a></li>
+                <li><a href="data_dict" data-history="#data_dict" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>Data Dictionary</a></li>
                 <li class="treeview">
                     <a href="#">
                         <i class="fa fa-wrench"></i>

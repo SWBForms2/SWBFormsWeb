@@ -37,11 +37,20 @@ eng.dataStores["mongodb"] = {
     host: "localhost",
     port: 27017,
     //clientURI="mongodb://user1:pwd1@host1/?authSource=db1&ssl=true",                              //Connection by clientURI
-    //clientURI: "mongodb://XXXXXXXX.documents.azure.com:10255/?ssl=true&replicaSet=globaldb",      //cosmosDB
+    //clientURI: "mongodb://XXXXXXXX.documents.azure.com:10255/?ssl=true&replicaSet=globaldb",      //CosmosDB  Microsoft
     //envHost="host";                                                                               //host defined by enviroment variable
     //envPort="port";                                                                               //port defined by enviroment variable
     //envClientURI="clientURI";                                                                     //clientURI defined by enviroment variable
     class: "org.semanticwb.datamanager.datastore.DataStoreMongo",
+};
+
+//******* DataStores ***************
+eng.dataStores["embedmongodb"] = {
+    host: "localhost",
+    port: 27017,
+    dbPath: "{appPath}/../embedmongo",
+    dbDataPath: "{appPath}/../embedmongo/data",  
+    class: "org.semanticwb.datamanager.datastore.DataStoreEmbedMongo"
 };
 
 /*
@@ -169,10 +178,10 @@ eng.dataProcessors["DefPropertiesProcessor"] = {
                 for (var i = 0; i < fs.size(); i++)
                 {
                     //print("fs:"+fs[i].getString("name"));
-                    var DataUtils = Java.type('org.semanticwb.datamanager.DataUtils');
-                    var id = DataUtils.createId();
                     if (!request.data[fs[i].getString("name")] || request.data[fs[i].getString("name")].length == 0)
                     {
+                        var DataUtils = Java.type('org.semanticwb.datamanager.DataUtils');
+                        var id = DataUtils.createId();
                         request.data[fs[i].getString("name")] = id;
                     }
                 }
@@ -181,21 +190,21 @@ eng.dataProcessors["DefPropertiesProcessor"] = {
                 fs = ds.findScriptFields("stype", "sequence");
                 for (var i = 0; i < fs.size(); i++)
                 {
-                    var id = 0;
-                    var r = this.getDataSource("DSCounter").find({"data": {"scls": scls, "field": fs[i].getString("name")}});
-                    if (r.hasNext())
-                    {
-                        var o = r.next();
-                        o.count++;
-                        id = o.count;
-                        this.getDataSource("DSCounter").updateObj(o);
-                    } else
-                    {
-                        id++;
-                        this.getDataSource("DSCounter").addObj({"scls": scls, "field": fs[i].getString("name"), "count": id});
-                    }
                     if (!request.data[fs[i].getString("name")] || request.data[fs[i].getString("name")].length == 0)
                     {
+                        var id = 0;
+                        var r = this.getDataSource("DSCounter").find({"data": {"scls": scls, "field": fs[i].getString("name")}});
+                        if (r.hasNext())
+                        {
+                            var o = r.next();
+                            o.count++;
+                            id = o.count;
+                            this.getDataSource("DSCounter").updateObj(o);
+                        } else
+                        {
+                            id++;
+                            this.getDataSource("DSCounter").addObj({"scls": scls, "field": fs[i].getString("name"), "count": id});
+                        }                        
                         request.data[fs[i].getString("name")] = id;
                     }
                 }          

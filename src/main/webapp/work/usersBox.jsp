@@ -22,10 +22,14 @@
         response.sendError(404);
         return;
     }
-    eng.getDataSource("voc_tipo_atencion").fetchObjByProp("id", obj.getString("tipo_atencion_id"),DataObject.EMPTY);
+    //eng.getDataSource("voc_tipo_atencion").fetchObjByProp("id", obj.getString("tipo_atencion_id"),DataObject.EMPTY);
     //obj.getDateFormated(key, format)
 %>
 <div>
     Usuario: <b><%=obj.getString("fullname")%></b><br>    
-    <font size="-1">email: <%=obj.getString("email")%></font>
+    <font size="-1">email: <%=obj.getString("email")%></font><br> 
+    <font size="-1">Nacimiento: <%=obj.getDate("birthday")%></font><br> 
+    <font size="-1">Creación: <%=obj.getDate("created")%></font><br> 
+    <font size="-1">Nacimiento: <%=obj.getString("birthday")%></font><br> 
+    <font size="-1">Creación: <%=obj.getString("created")%></font><br> 
 </div>

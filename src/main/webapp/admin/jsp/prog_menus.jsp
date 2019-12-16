@@ -232,6 +232,7 @@
                     //{name: "icon"},
                     {name: "iconClass"},
                     {name: "roles_view", width:"100%"},
+                    {name: "script_view", width:"100%"},
                     {name: "status"},                    
                     {name: "path", width:"100%", showIf:"form.hasType(['ajax','iframe','url'])"},
                     {name: "engine", showIf:"form.hasType(['sc','process'])"},
@@ -296,7 +297,9 @@
                             return {};
                         }, 
                     },
-                    {name: "formAddiJS", showIf:"form.hasType(['sc_grid_detail','sc_form','process','sc_search_detail','sc_fulltext_search_detail'])"},                                        
+                    {name: "formAddiJS", showIf:"form.hasType(['sc_grid_detail','sc_form','process','sc_search_detail','sc_fulltext_search_detail'])"},        
+                    {name: "formProcessor", showIf:"form.hasType(['sc_grid_detail','sc_form','process','sc_search_detail','sc_fulltext_search_detail'])"},        
+                    
                     {name: "contextBox", width:"100%"},
                     {name: "helpBox", width:"100%", showIf:"form.hasType(['detail'])"},
                     {name: "roles_add", width:"100%", showIf:"form.hasType('sc')"},

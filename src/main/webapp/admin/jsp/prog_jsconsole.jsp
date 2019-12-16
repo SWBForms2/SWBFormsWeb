@@ -18,7 +18,7 @@
     if(seng!=null && cmd!=null)
     {
         out.print("<pre>");
-        out.println(DataMgr.initPlatform(seng, session).eval(cmd));
+        out.println(DataMgr.initPlatform(seng, session).eval("JSON.stringify("+cmd+")"));
         out.print("</pre>");
         return;
     }

@@ -9,6 +9,8 @@ var eng = {
         {operationType: "update", dataProtocol: "postMessage"},
         {operationType: "remove", dataProtocol: "postMessage"},
         {operationType: "validate", dataProtocol: "postMessage"},
+        {operationType: "init", dataProtocol: "postMessage"},
+        {operationType: "change", dataProtocol: "postMessage"},
     ],
     config:{},
     dataStores:{},                      //DataStores
@@ -17,6 +19,7 @@ var eng = {
     validators:{},                      //Validator templates
     dataServices:{},                    //Servicios
     dataProcessors:{},                  //DataProcessors
+    formProcessors:{},                  //FormProcessors
     authModules:{},                     //Modulos de autenticación    
     userRepository:{},                  //User Repository
     
@@ -796,6 +799,10 @@ var eng = {
                 {
                     data.fields.unshift({name: "_id", type: "string", hidden: true, primaryKey: true});    //Insertar llave primaria
                 }
+                
+                //data.handleError=function(response, request){
+                //    console.log(response,request);
+                //}
               
                 //console.log("createDataSource:",data);
                 var rds=isc.RestDataSource.create(data);
@@ -978,6 +985,14 @@ var eng = {
                 //var fieldName = this.getFieldName(colNum);
                 //console.log(this,record,fieldName);                
                 var mode=this.getField(colNum).canEditModes;
+                if(mode)
+                {
+                    
+                    if(record && mode.indexOf("update")==-1)return false;
+                    if(!record && mode.indexOf("add")==-1)return false;
+                } 
+                
+                mode=this.getField(colNum).canViewModes;
                 if(mode)
                 {
                     
@@ -1228,6 +1243,14 @@ var eng = {
         {
             formBase.showTabs = true;
         }
+        if (formBase.processInit===undefined)
+        {
+            formBase.processInit = false;
+        }
+        if (formBase.processChange===undefined)
+        {
+            formBase.processChange=false;
+        }        
         //***** nueva propiedad *********//
         if (formBase.title)
             delete formBase.title;
@@ -1238,6 +1261,7 @@ var eng = {
 
         var form = isc.DynamicForm.create(formBase);   
         
+        var topButts=[];
         var butts=[];
         
         if(!(form.canPrint===false))
@@ -1308,6 +1332,9 @@ var eng = {
             //form.tabs.tabSelected();
         }
         
+        var topButtons=isc.HLayout.create({height: "20px", padding:"0px", membersMargin:20, align:"left", members: topButts,autoDraw:false});
+        topButtons.hide();  
+        
         var buttons=isc.HLayout.create({height: "20px", padding:"10px", membersMargin:20, align:"right", members: butts,autoDraw:false});
         
         var layout=isc.VLayout.create({
@@ -1317,21 +1344,28 @@ var eng = {
             width: base.width,
             height: base.height,
             members: [
+                topButtons,
                 tabs,
                 buttons,
             ],
             position: "relative",
-        });
-        
+        });                
         //tabs.setBorder("1px solid darkgray");
-        layout.setZIndex(0)
+        layout.setZIndex(0);
 
         //Para tener acceso al layout desde la forma, al contenedor de botones y al boton de submit
         form.layout=layout;
         form.submitButton=submit;
         form.printButton=print;
+        form.topButtons=topButtons;
         form.buttons=buttons;
         form.tindex=0;
+        
+        form.addTopButton=function(butt)
+        {
+            form.topButtons.addMember(butt);
+            form.topButtons.show();
+        };
 
         //Process linked objects
         
@@ -1348,6 +1382,13 @@ var eng = {
                     if((fetchId && fetchId != null) && mode.indexOf("update")==-1)items[i].setEnabled(false);
                     if(!(fetchId && fetchId != null) && mode.indexOf("add")==-1)items[i].setEnabled(false);
                 }
+                
+                mode=items[i].canViewModes;
+                if(mode)
+                {
+                    if((fetchId && fetchId != null) && mode.indexOf("update")==-1)items[i].hide();
+                    if(!(fetchId && fetchId != null) && mode.indexOf("add")==-1)items[i].hide();
+                }
             }
         }
         
@@ -1355,13 +1396,34 @@ var eng = {
         {
             eng.fetchForm(form, {_id: fetchId}, function()
             {
+                if(form.processInit)form.submit(function(){},{operationType:"init"});
                 if(form.tabs)form.tabs.tabSelected();
-                if(base.onLoad)base.onLoad(form);
+                if(form.onLoad)form.onLoad(form);    
+                //console.log(form.onLoad);                
             });
         }else
         {
             if(form.tabs)form.tabs.tabSelected();
-            if(base.onLoad)base.onLoad(form);
+            if(form.onLoad)form.onLoad(form);
+        }
+        
+        if(form.processChange)
+        {
+            for(var j=0;j<form.items.length;j++)
+            {                
+                
+                form.items[j].editorEnter=function(form, item, value)
+                {
+                    item._swf_enterValue=value;
+                };
+                form.items[j].editorExit=function(form, item, value)
+                {
+                    if((""+item._swf_enterValue)!==(""+value))
+                    {
+                        form.submit(function(){},{operationType:"change", field:item.name});
+                    }
+                };
+            }        
         }
         
         eng.resize(form);        
@@ -1407,7 +1469,7 @@ var eng = {
                 this.Super("closeClick", arguments);
                 //win=null;
             },
-            items:[tabs,form.buttons]
+            items:[form.topButtons,tabs,form.buttons]
         });   
         
         win.animateShow("slide", null, 500, "smoothStart");
@@ -2296,6 +2358,81 @@ var eng = {
                 NumberUtil.groupingSymbol=",";              
             
                 eng.utils.loadJS(eng.contextPath + "/platform/js/eng_lang.min.js",false,cache,true, eng.staticVersion);
+                
+                //DataProcessor Error Handler
+                isc.RPCManager.addClassProperties({
+                    handleError : function (response, request) { 
+                        //console.log(response,request); 
+                        if(!response.data)
+                        {
+                            //nothing todo
+                        }else if(typeof response.data ==="string")
+                        {
+                            isc.warn(response.data); 
+                        }else if(typeof response.data === "object")
+                        {
+                            var form=window[response.context.componentId];  
+                            var errors=response.data._errors;               //Objeto para mostrar errores
+                            var hints=response.data._hints;                 //Objeto para mostrar hints
+                            var msg=response.data._msg;                     //String para mostrar mensaje
+                            var enabled=response.data._enabled;             //Objeto para mostrar habilitar o deshabilidar fields
+                            var visible=response.data._visible;             //Objeto para mostrar hacer visibles o no los fields
+                            delete response.data._errors;
+                            delete response.data._hints;
+                            delete response.data._msg;
+                            delete response.data._enabled;
+                            delete response.data._visible;
+                            for(var prop in response.data) 
+                            {
+                                form.setValue(prop, response.data[prop]);                                                            
+                            }
+                            if(errors)
+                            {
+                                var err="";
+                                for(var prop in errors) 
+                                {
+                                    form.setFieldErrors(prop,errors[prop]);
+                                    err+="<b>"+form.getItem(prop).title+"</b>: "+errors[prop]+"<br>";
+                                    form.setFocusItem(prop);
+                                }   
+                                if(!msg)msg=err;
+                            }
+                            if(hints)
+                            {
+                                for(var prop in errors) 
+                                {
+                                    form.getItem(prop).setHint(hints[prop]);
+                                }                                
+                            }
+                            if(enabled)
+                            {
+                                for(var prop in enabled) 
+                                {
+                                    form.getItem(prop).setDisabled(!enabled[prop]);
+                                }                                
+                            }
+                            if(visible)
+                            {
+                                for(var prop in visible) 
+                                {
+                                    if(visible[prop])form.getItem(prop).show();
+                                    else form.getItem(prop).hide();
+                                    
+                                }                                
+                            }
+                            form.redraw();
+                            if(msg)isc.warn(msg);
+                            
+                            for(var prop in errors) 
+                            {
+                                form.setFocus(prop);
+                                break;
+                            }   
+                            //console.log(form);
+                        }                           
+                        return false;
+                    }
+                })                
             }
             //console.log("window.location.pathname",window.location.pathname);
             if(typeof file === 'string')

@@ -4,18 +4,18 @@
     Author     : javiersolis
 --%><%@page import="org.semanticwb.datamanager.*"%><%
     String contextPath = request.getContextPath();
-    System.out.println("Validator");
+    //System.out.println("Validator");
     SWBScriptEngine engine = DataMgr.initPlatform("/WEB-INF/global.js",session);
 
     String cmd = (String)request.getAttribute("servletPath");
     cmd = cmd.substring(cmd.lastIndexOf("/") + 1);
     
-    System.out.println("Validator:"+cmd);    
-    System.out.println(request.getServletContext());    
-    System.out.println(request.getRequestURI());    
-    System.out.println(request.getRequestURL());    
-    System.out.println(request.getPathInfo());    
-    System.out.println(request.getPathTranslated());    
+    //System.out.println("Validator:"+cmd);    
+    //System.out.println(request.getServletContext());    
+    //System.out.println(request.getRequestURI());    
+    //System.out.println(request.getRequestURL());    
+    //System.out.println(request.getPathInfo());    
+    //System.out.println(request.getPathTranslated());    
     
     switch (cmd) {
         case "email": {

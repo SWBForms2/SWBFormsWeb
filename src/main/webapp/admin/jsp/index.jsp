@@ -92,7 +92,15 @@
             .ifram_content{
                 overflow:hidden;
                 border:none;    
-            }   
+            }
+            
+            .tab_filled{
+                border-top-color: #06ad58 !important;
+            }
+            
+            .active{
+                border-top-color: #3c8dbc !important;
+            }
             
             @media (max-width: 767px)
             {
@@ -186,6 +194,7 @@
                     <!-- logo for regular state and mobile devices -->
                     <span class="logo-lg"><img style="background-color: white; border-radius: 50%; padding: 2px; width: 35px" src="<%=contextPath%>/admin/img/logo2.png" width="30"> <b><%=eng.getAppName()%></b></span>
                 </a>
+                
                 <!-- Header Navbar: style can be found in header.less -->
                 <nav class="navbar navbar-static-top" role="navigation">
                     <!-- Sidebar toggle button-->
@@ -343,8 +352,8 @@
                     }
                     $(window).resize(function(){ fix_height(); });
                     //$("#preview").contentWindow.focus();
-                    
-                    loadContent("home",".content-wrapper");
+                    if(location.hash.length>0)loadContent("admin_content?p="+location.hash.substring(1),".content-wrapper");
+                    else loadContent("home",".content-wrapper");
             });            
         </script>                 
         <script src="<%=contextPath%>/static/plugins/bootstrap-select/js/bootstrap-select.min.js" type="text/javascript"></script>  

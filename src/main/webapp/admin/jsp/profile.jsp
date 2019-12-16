@@ -29,7 +29,7 @@
         style="color: white;background: #f03b2c;padding: 10px;";
     }
     
-    System.out.println(fullname);
+    //System.out.println(fullname);
 %>
 <!-- Content Header (Page header) -->
 <section class="content-header">

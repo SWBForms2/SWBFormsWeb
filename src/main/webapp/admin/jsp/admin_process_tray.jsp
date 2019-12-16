@@ -114,9 +114,9 @@
             String displayField=ds.getDataSourceScript().getString("displayField");
             String valueField=prop.getString("valueField");
 
-            System.out.println("value:"+value);
-            System.out.println("ds:"+ds);            
-            System.out.println("displayField:"+displayField);
+            //System.out.println("value:"+value);
+            //System.out.println("ds:"+ds);            
+            //System.out.println("displayField:"+displayField);
 
             if(displayField!=null && (valueField==null || (valueField!=null && !valueField.equals(displayField))))
             {
@@ -129,7 +129,7 @@
                 DataObject ref=cache.getDataObject(value,DataObject.EMPTY);
                 value=ref.getString(displayField);
             }
-            System.out.println("value2:"+value);
+            //System.out.println("value2:"+value);
         }
         if(value==null)value="_";
         return value;
@@ -140,15 +140,15 @@
     String contextPath = request.getContextPath();
     SWBScriptEngine eng=DataMgr.initPlatform("/admin/ds/admin.js", session);
     DataObject user=eng.getUser();
-    System.out.println("user:"+user);
+    //System.out.println("user:"+user);
     
     String pid=request.getParameter("pid");
     DataObject opage=eng.getDataSource("Page").getObjectByNumId(pid);   
     
     SWBProcess process=eng.getProcessMgr().getProcess(opage.getString("process"));
-    System.out.println("process:"+process);
+    //System.out.println("process:"+process);
     String ds=opage.getString("ds"); 
-    System.out.println("ds:"+ds);
+    //System.out.println("ds:"+ds);
     DataObject initTransition=process.getUserInitTransition(eng);
     
 %>

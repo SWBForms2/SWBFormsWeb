@@ -161,7 +161,7 @@
     
     int j=0;        
     boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-    System.out.println("isMultipart:"+isMultipart);
+    //System.out.println("isMultipart:"+isMultipart);
     if(isMultipart)
     {   
         SWBDataSource ds=eng.getDataSource(ds_s);

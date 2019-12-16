@@ -306,7 +306,7 @@
             <%
                 if (filename != null) {
             %>            
-            <textarea name="code" id="code"><%=code%></textarea>           
+            <textarea name="code" id="code"><%=code.replace("<","&"+"lt;")%></textarea>           
             <script type="text/javascript">
                 
                 var getSynchData=function(url,data,method)

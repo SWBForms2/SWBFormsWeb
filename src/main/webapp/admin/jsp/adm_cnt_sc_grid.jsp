@@ -400,7 +400,9 @@
                             contents:"<img style=\"cursor: pointer; padding: 5px 11px;\" width=\"16\" height=\"16\" src=\"<%=contextPath%>/platform/isomorphic/skins/Tahoe/images/actions/edit.png\">", 
                             //dynamicContents:false,
                             click: function () {
-                                parent.loadContent("<%=_fileName%>?<%=p%>&id=" + record["_id"],".content-wrapper");
+                                var id=record["_id"];
+                                if(id!=null)id=id.substring(id.lastIndexOf(":")+1);
+                                parent.loadContent("<%=_fileName%>?<%=p%>:" + id,".content-wrapper",null,null,"#<%=p.substring(2)%>:"+ id);
                                 return false;
                             }
                         });
@@ -415,7 +417,9 @@
 %>                  
                 recordDoubleClick: function(grid, record)
                 {
-                    parent.loadContent("<%=_fileName%>?<%=p%>&id="+ record["_id"],".content-wrapper");
+                    var id=record["_id"];
+                    if(id!=null)id=id.substring(id.lastIndexOf(":")+1);
+                    parent.loadContent("<%=_fileName%>?<%=p%>:"+ id,".content-wrapper",null,null,"#<%=p.substring(2)%>:"+ id);
                     return false;
                 },
 <%
@@ -425,7 +429,7 @@
 %>                
                 addButtonClick: function(event)
                 {
-                    parent.loadContent("<%=_fileName%>?<%=p%>&a=1",".content-wrapper");
+                    parent.loadContent("<%=_fileName%>?<%=p%>&a=1",".content-wrapper",null,null,"#<%=obj.getNumId()%>_add");
                     return false;
                 },                                 
 <%
@@ -441,7 +445,17 @@
         }else
         {
             //********************************** Form ************************************************************
-            String sid = add?"null":"\"" + eng.getDataSource(obj.getString("ds")).getObjectByNumId(id,DataObject.EMPTY).getId() + "\"";
+            String sid = null;
+
+            if(linkProp!=null)
+            {
+                DataObject inst=eng.getDataSource(_ds).fetchObjByProp(linkProp, linkValue);
+                if(inst==null)add=true;
+                else sid="\""+inst.getId()+"\"";
+            }else
+            {
+                sid = add?"null":"\"" + eng.getDataSource(obj.getString("ds")).getObjectByNumId(id,DataObject.EMPTY).getId() + "\"";
+            }
 %>
             var form = eng.createForm({
                 width: "100%",
@@ -451,6 +465,8 @@
                 showTabs: false,
                 canPrint: false,
                 canEdit: <%=(eng.hasUserAnyRole(obj.getDataList("roles_update")) || (eng.hasUserAnyRole(obj.getDataList("roles_add")) && add))%>,
+                <%=(eng.findFormProcessors(_ds, SWBDataSource.ACTION_INIT)!=null)?"processInit: true,":""%>
+                <%=(eng.findFormProcessors(_ds, SWBDataSource.ACTION_CHANGE)!=null)?"processChange: true,":""%>
                 numCols: 2,
                 colWidths: [250, "*"],
                 requiredTitlePrefix: "<b>* ",
@@ -494,7 +510,7 @@
             retPath=retPath.substring(0,retPath.lastIndexOf(":"));
         }else
         {
-            retPath=pt+"&t=tab_"+retPath.substring(retPath.lastIndexOf("/")+1);
+            retPath=pt+"&t="+retPath.substring(retPath.lastIndexOf("/")+1);
         }
     }    
 %>                
@@ -503,6 +519,9 @@
                 }
             }));
             form.buttons.members.unshift(form.buttons.members.pop());  
+            //form.layout.members.unshift(form.topButtons);
+            //form.topButtons.align="left";
+            
             
             <%=parseScript(obj.getString("formAddiJS"),request,user)%>
 <%

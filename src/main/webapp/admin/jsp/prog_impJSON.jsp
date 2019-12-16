@@ -10,7 +10,7 @@
     
     int j=0;        
     boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-    System.out.println("isMultipart:"+isMultipart);
+    //System.out.println("isMultipart:"+isMultipart);
     if(isMultipart)
     {   
         SWBDataSource ds=null;
@@ -29,7 +29,7 @@
         List<FileItem> items = upload.parseRequest(request);
         for(FileItem item:items)
         {
-            System.out.println(item.getFieldName());
+            //System.out.println(item.getFieldName());
             if (!item.isFormField()) {
                 String value = item.getName();
                 value = value.replace("\\", "/");

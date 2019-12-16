@@ -95,6 +95,18 @@
                 } else if (SWBDataSource.ACTION_REMOVE.equals(operationType))
                 {
                     ret=ds.remove(json);
+                } else if (SWBDataSource.ACTION_INIT.equals(operationType))
+                {
+                    DataObject trxParams=new DataObject();
+                    DataObject req=engine.invokeFormProcessors(ds.getName(), SWBDataSource.ACTION_INIT, SWBDataProcessor.METHOD_REQUEST, json, trxParams);
+                    ret=SWBDataSource.getError(-1);
+                    ret.getDataObject("response").addParam("data", req.get("data"));  
+                } else if (SWBDataSource.ACTION_CHANGE.equals(operationType))
+                {
+                    DataObject trxParams=new DataObject();
+                    DataObject req=engine.invokeFormProcessors(ds.getName(), SWBDataSource.ACTION_CHANGE, SWBDataProcessor.METHOD_REQUEST, json, trxParams);
+                    ret=SWBDataSource.getError(-1);
+                    ret.getDataObject("response").addParam("data", req.get("data"));  
                 } else if (SWBDataSource.ACTION_VALIDATE.equals(operationType))
                 {
                     ret=ds.validate(json);
@@ -193,10 +205,19 @@
             }
         }
     } catch (Throwable e)
-    {
+    {        
         if(e instanceof jdk.nashorn.internal.runtime.ECMAException)
         {
-            System.out.println("Script Error:"+e.getMessage());
+            Object obj=DataUtils.toData(((jdk.nashorn.internal.runtime.ECMAException)e).getEcmaError());   
+            System.out.println(obj.getClass());
+            if(obj instanceof org.semanticwb.datamanager.DataObject)
+            {
+                DataObject ret=SWBDataSource.getError(-1);
+                ret.getDataObject("response").putAll((DataObject)obj);
+                out.print(ret);
+                System.out.println(ret);
+                return;
+            }
         }else
         {
             e.printStackTrace();
@@ -205,5 +226,6 @@
         DataObject ret=SWBDataSource.getError(-1);
         ret.getDataObject("response").addParam("data", e.getMessage());
         out.print(ret);
+        System.out.println(ret);
     }
 %>

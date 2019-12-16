@@ -2,7 +2,8 @@
     Document   : admin_content.jsp
     Created on : 10-feb-2018, 19:57:02
     Author     : javiersolis
---%><%@page import="java.util.*"%><%@page import="java.net.*"%><%@page import="java.io.IOException"%><%@page import="org.semanticwb.datamanager.*"%><%@page import="org.semanticwb.datamanager.script.ScriptObject"%><%@page contentType="text/html" pageEncoding="UTF-8"%><%!
+--%><%@page import="javax.script.Bindings"%>
+<%@page import="java.util.*"%><%@page import="java.net.*"%><%@page import="java.io.IOException"%><%@page import="org.semanticwb.datamanager.*"%><%@page import="org.semanticwb.datamanager.script.ScriptObject"%><%@page contentType="text/html" pageEncoding="UTF-8"%><%!
     
     String getPageLink(DataObject base, boolean active, boolean link)
     {
@@ -91,7 +92,7 @@
             }else
             {
                 ret.append("<li>");
-                ret.append("<a href=\"admin_content?"+getParams(paths, x)+"&t=tab_"+obj.getNumId()+"\" data-history=\"#"+obj.getNumId()+"\" data-target=\".content-wrapper\" data-load=\"ajax\">");
+                ret.append("<a href=\"admin_content?"+getParams(paths, x)+"&t="+obj.getNumId()+"\" data-history=\"#"+obj.getNumId()+"\" data-target=\".content-wrapper\" data-load=\"ajax\">");
                 ret.append(obj.getString("name",""));
                 ret.append("</a>");
                 ret.append("</li>");                
@@ -122,15 +123,14 @@
                     contextBox=request.getContextPath()+contextBox;
                     if(id!=null)contextBox+="?id="+id;
                     StringBuilder txt=new StringBuilder();
-                    txt.append("<div id=\"pg_"+obj.getNumId()+"\" class=\"col-md-4 callout callout-info lead\">");                    
+                    txt.append("<div id=\"pg_"+obj.getNumId()+"\" class=\"col-md-3 callout callout-info lead\">");                    
                     txt.append("</div>"); 
                     txt.append("<script type=\"text/javascript\">");
                     txt.append("loadContent(\""+contextBox+"\",\"#pg_"+obj.getNumId()+"\");");
                     txt.append("</script>");
                     helpBoxes.add(txt.toString());
                 }
-            }
-            
+            }   
         }
         return ret.toString();
     }
@@ -216,6 +216,44 @@
         pid=pid.substring(0,i);
     }   
     
+    //Pacientes
+    {
+        String txt="";
+        if(paths.get(0).startsWith("paciente:"))
+        {
+            DataObject paciente=eng.getDataSource("paciente").getObjectByNumId(paths.get(0).substring(9));
+            
+            String edad="";
+            try{
+                java.time.LocalDate birthDate = paciente.getDate("fecha_nacimiento").toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+                java.time.LocalDate currentDate = java.time.LocalDate.now();
+                if (paciente.containsKey("fecha_defuncion"))currentDate = paciente.getDate("fecha_defuncion").toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+                long years = java.time.temporal.ChronoUnit.YEARS.between(birthDate, currentDate);
+                if(years<2){
+                    years = java.time.temporal.ChronoUnit.MONTHS.between(birthDate, currentDate);
+                    edad = years+" meses";
+                }else{
+                    edad = years+" años";
+                }
+            }catch (Exception ex) {
+                edad="---";
+                out.println("<!--ex"+ex.getMessage()+"-->");
+            }                        
+            
+            txt="    <div>\\n" +
+                "           <img src=\"/admin/img/user.jpg\" class=\"user-image\" alt=\"User Image\">\\n" +
+                "    </div>\\n" +
+                "    <div>\\n" +
+                "          <p><b>Paciente:</b><a href=\"#\">"+paciente.getString("nombre","")+" "+paciente.getString("ap_paterno","")+" "+paciente.getString("ap_materno","")+"</a></p>\\n" +
+                "          <p><b>Sexo:</b>"+eng.getDataSource("voc_sexo").fetchObjByProp("id", paciente.getString("voc_sexo_id"),DataObject.EMPTY).getString("descripcion","-")+
+                " <b>Edad:</b>"+ edad +
+                //" <b>Registro:</b>202020</p>\\n" +
+                "          <p><b>CURP:</b>"+paciente.getString("curp","-")+
+                //" <b>Asistencias en el año:</b>8</p>\\n" +
+                "    </div>";
+        }
+        out.println("<script type=\"text/javascript\">$('.cabeceraDatos-paciente').html('"+txt+"')</script>");       
+    }    
     
     //Find extra parameters
     Map<String,String[]> pmap=new HashMap();
@@ -246,20 +284,25 @@
     String _fileName="admin_content";
     String type=obj.getString("type");
     
+    String rpid=pid;
+    String rid=id;
     if(_path.length()>0)
     {
-        String id2=id;    
-        if(id2==null && paths.size()>1)
+        if(rid==null && paths.size()>1)
         {        
-            String pid2=paths.get(paths.size()-2);
-            int i2=pid2.indexOf(":");
+            rpid=paths.get(paths.size()-2);
+            int i2=rpid.indexOf(":");
             if(i2>-1)
             {
-                id2=pid2.substring(i2+1);
-                pid2=pid2.substring(0,i2);
+                rid=rpid.substring(i2+1);
+                rpid=rpid.substring(0,i2);
+                
             } 
-        }        
-        _path=_path.replace("{id}", id2);
+        }
+        if(rid!=null)
+        {
+            _path=_path.replace("{id}", rid);
+        }
     }
     
     //add context
@@ -291,7 +334,7 @@
     DataList<String> helpBoxes=new DataList();     
     String breadcrumb=getPagePath(eng, request, paths, helpBoxes);            
     String helpBox=obj.getString("helpBox","").trim();        
-    if(!helpBox.isEmpty())helpBoxes.add("<div class=\"col-md-4 callout callout-info lead\">"+helpBox+"</div>");  
+    if(!helpBox.isEmpty())helpBoxes.add("<div class=\"col-md-3 callout callout-info lead\">"+helpBox+"</div>");  
 
 %><!-- Content Header (Page header) -->
 <section class="content-header">
@@ -337,11 +380,11 @@
 %>
 <section id="content" class="content">  
     <div class="row">
-        <div class="col-md-<%=helpBoxes.isEmpty()?"12":"8"%>" id="main_content">
+        <div class="col-md-<%=helpBoxes.isEmpty()?"12":"9"%>" id="main_content">
             <!-- Custom Tabs -->
             <div class="nav-tabs-custom">
                 <ul class="nav nav-tabs">
-                    <li class=""><a href="#info" id="tab_info" data-toggle="tab" aria-expanded="true" ondblclick="loadContent('adm_cnt_iframe?<%=p%><%=(a!=null?"&a="+a:"")%>','#info')" onclick="this.onclick=undefined;this.ondblclick();"><%=add?"Agregar "+_title:"Información"%></a></li>                                        
+                    <li class="<%=(a==null?"tab_filled":"")%>"><a href="#info" id="tab_info" data-toggle="tab" aria-expanded="true" ondblclick="loadContent('adm_cnt_iframe?<%=p%><%=(a!=null?"&a="+a:"")%>','#info')" onclick="this.onclick=undefined;this.ondblclick();"><%=add?"Agregar "+_title:"Información"%></a></li>                                        
 <%
         if(!add)
         {
@@ -349,6 +392,18 @@
             while (it.hasNext()) {
                 DataObject tab = it.next();       
                 if(!tab.getString("status","active").equals("active"))continue;
+                if(!eng.hasUserAnyRole(tab.getDataList("roles_view")))continue;
+                String tabClass="tab_unfilled";
+                if(tab.getString("script_view")!=null && tab.getString("script_view").trim().length()>0)
+                {
+                    Bindings params=eng.getUserBindings();
+                    params.put("tab", tab);
+                    DataObject robj=eng.getDataSource(eng.getDataSource("Page").getObjectByNumId(rpid).getString("ds")).fetchObjByNumId(rid);
+                    params.put("obj", robj);  
+                    Object ret=eng.eval("("+tab.getString("script_view")+"(obj,tab,sengine));",params);
+                    if(ret instanceof Boolean && !((Boolean)ret))continue;
+                    if(ret instanceof String)tabClass=(String)ret;
+                }
                 String tabType=tab.getString("type");
                 if("ajax_content".equals(tabType))
                 {
@@ -358,12 +413,12 @@
                     //String sid[]=id.split(":");
                     //if(sid.length==4)tabPath=tabPath.replace("{ID}", sid[3]);
 %>
-                    <li class=""><a href="#<%=tab.getNumId()%>" id="tab_<%=tab.getNumId()%>" data-toggle="tab" aria-expanded="false" ondblclick="loadContent('<%=tabPath%>','#<%=tab.getNumId()%>')" onclick="this.onclick=undefined;this.ondblclick();"><%=tab.getString("name")%></a></li>
+                    <li class="<%=tabClass%>"><a href="#<%=tab.getNumId()%>" id="tab_<%=tab.getNumId()%>" data-toggle="tab" aria-expanded="false" ondblclick="loadContent('<%=tabPath%>','#<%=tab.getNumId()%>')" onclick="this.onclick=undefined;this.ondblclick();"><%=tab.getString("name")%></a></li>
 <%                    
                 }else
                 {
 %>
-                    <li class=""><a href="#<%=tab.getNumId()%>" id="tab_<%=tab.getNumId()%>" data-toggle="tab" aria-expanded="false" ondblclick="loadContent('adm_cnt_iframe?<%=p%>&p=<%=tab.getNumId()%>','#<%=tab.getNumId()%>')" onclick="this.onclick=undefined;this.ondblclick();"><%=tab.getString("name")%></a></li>
+                    <li class="<%=tabClass%>"><a href="#<%=tab.getNumId()%>" id="tab_<%=tab.getNumId()%>" data-toggle="tab" aria-expanded="false" ondblclick="loadContent('adm_cnt_iframe?<%=p%>&p=<%=tab.getNumId()%>','#<%=tab.getNumId()%>')" onclick="this.onclick=undefined;this.ondblclick();"><%=tab.getString("name")%></a></li>
 <%
                 }
             }   
@@ -386,7 +441,7 @@
 %>                    
                 </div><!-- /.tab-content -->
                 <script type="text/javascript">
-                    $('#<%=t!=null?t:"tab_info"%>').trigger("click");
+                    $('#<%=t!=null?"tab_"+t:"tab_info"%>').trigger("click");
                 </script>                                                
             </div><!-- nav-tabs-custom -->
         </div><!-- /.col -->

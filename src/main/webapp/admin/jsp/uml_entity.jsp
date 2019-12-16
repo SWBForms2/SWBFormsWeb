@@ -38,6 +38,7 @@
                 String name=fobj.getString("name");
                 String type=fobj.getString("type");
                 String dataSource=null;
+                String valueField=null;
                 boolean multiple=false;
 
                 if(req)data.append("*");
@@ -51,28 +52,32 @@
                     String att=feobj.getString("att");
                     String value=feobj.getString("value");   
 
-                    if(att.equals("stype"))type=value;
-                    if(att.equals("dataSource"))dataSource=value;
+                    if(att.equals("stype"))type+="("+value+")";
+                    if(att.equals("dataSource"))
+                    {
+                        dataSource=value;
+                        //if(valueField==null)valueField="_id";
+                    }
+                    if(att.equals("valueField"))valueField=value;                    
                     if(att.equals("multiple"))multiple=Boolean.parseBoolean(value);
                 }
 
                 if(dataSource!=null)
                 {
-                    data.append(":"+ dataSource);                
-                    rel.append("["+obj.getString("id")+"]");
-                    rel.append("->");
+                    data.append(":"+ dataSource+(valueField!=null?"."+valueField:""));                
+                    rel.append("["+dataSource+"]");
                     if(multiple)
                     {
                         //data.append("(0..*)");
-                        rel.append("0..*");
+                        rel.append("*");
                     }
-                    rel.append("["+dataSource+"]");
+                    rel.append("<-");
+                    rel.append("["+obj.getString("id")+"]");
                     rel.append("\\n");
                 }     
                 else if(type!=null)data.append(": "+type);     
                 if(it2.hasNext())data.append(";");            
             }
-
             data.append("]\\n");        
         }
         data.append(rel);

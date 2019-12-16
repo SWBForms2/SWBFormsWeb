@@ -2,9 +2,7 @@
     Document   : prog_menu
     Created on : 10-feb-2018, 19:57:02
     Author     : javiersolis
---%><%@page import="org.semanticwb.datamanager.DataMgr"%>
-<%@page import="org.semanticwb.datamanager.SWBScriptEngine"%>
-<%@page contentType="text/html" pageEncoding="UTF-8"%><%
+--%><%@page import="org.semanticwb.datamanager.DataMgr"%><%@page import="org.semanticwb.datamanager.SWBScriptEngine"%><%@page contentType="text/html" pageEncoding="UTF-8"%><%
     String contextPath = request.getContextPath();     
     String _title="DataSources";
     String _ds="DataSource";
@@ -140,7 +138,7 @@
                 showRecordComponentsByCell: true,
                 //recordComponentPoolingMode: "recycle",
                 fields: [
-                    {name: "id", canEdit:false},
+                    {name: "id"},
                     {name: "description"},
                     {name: "backend"},
                     {name: "frontend"},        
@@ -148,7 +146,6 @@
                     {name: "roles_add"},
                     {name: "roles_update"},
                     {name: "roles_remove"},   
-                    
                     {name: "edit", title: " ", width:32, canEdit:false, canFilter:false, formatCellValue: function (value) {return " ";}},
                 ],
 
@@ -401,6 +398,8 @@
                 
                 expansionFieldImageShowSelected:true,
                 canExpandRecords: true,
+                
+                wrapCells: true,
                                 
                 initialCriteria: {"ds":"<%=id%>"},
                 fields: [
@@ -475,7 +474,7 @@
                     return true;
                 },
                 fields: [
-                    {name: "id", change:"form.setValue('scls',value)", <%=!add?"editorType: \"StaticTextItem\", canEdit:false":"required:true"%>},
+                    {name: "id", change:"form.setValue('scls',value)", required:true},
                     {name: "description", width:"100%", type:"text"},
                     {name: "scls"},
                     {name: "modelid", hint:"_modelid", showHintInField:true},

@@ -432,6 +432,36 @@ public class AdminUtils {
                                     e.printStackTrace();
                                 }
                             }
+                            
+                            ds = eng.getDataSource("FormProcessor");
+                            it = ds.find();
+                            while (it.hasNext()) {
+                                DataObject obj = it.next();
+                                try {
+                                    if (!obj.getBoolean("active", false)) {
+                                        continue;
+                                    }
+
+                                    String id = obj.getString("id");
+                                    DataList dataSources = obj.getDataList("dataSources", new DataList());
+                                    DataList actions = obj.getDataList("actions", new DataList());
+                                    String request = obj.getString("request");
+                                    int order = obj.getInt("order");
+
+                                    ret = new StringBuilder();
+                                    ret.append("eng.formProcessors[\"" + id + "\"] = {" + "\n");
+                                    ret.append("    dataSources: " + dataSources + "," + "\n");
+                                    ret.append("    actions: " + actions + "," + "\n");
+                                    ret.append("    order: " + order + "," + "\n");
+                                    if (request != null && request.trim().length() > 0) {
+                                        ret.append("    request: " + request.replace("\n", "\n    ") + "," + "\n");
+                                    }
+                                    ret.append("};" + "\n");
+                                    ds_cache.addSubObject("FormProcessor_" + obj.getString("id")).addParam("text", compile(eng,ret.toString(),ext.toString(),false)).addParam("backend", true).addParam("frontend", false);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }                            
 
                             ds = eng.getDataSource("DataService");
                             it = ds.find();

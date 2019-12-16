@@ -196,5 +196,6 @@ public class FormsServletContextListener implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         logger.log(Level.INFO,"Web Application Stoped");
+        DataMgr.stopInstance();
     }
 }

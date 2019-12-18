@@ -47,76 +47,46 @@
         
         calendar.fetchPData=function()
         {
+            var dateStart;
+            var dateEnd;
+            
             if(calendar.getCurrentViewName()==="day")
             {
-                calendar.fetchData({
-                            $and:[
-                                {
-                                    startDate:{
-                                        $gte:calendar.chosenDateStart.toISOString()
-                                    }
-                                },{
-                                    startDate:{
-                                        $lte:calendar.chosenDateEnd.toISOString()
-                                    }
-                                }
-                            ]
-                        },
-                        function(){
-                            //alert("Hola");
-                        },
-                        {
-                            startRow:0,
-                            endRow:0
-                        }
-                );                  
+                 dateStart=calendar.chosenDateStart.toISOString();
+                 dateEnd=calendar.chosenDateEnd.toISOString();
             }else if(calendar.getCurrentViewName()==="week")
             {
-                calendar.fetchData({
-                            $and:[
-                                {
-                                    startDate:{
-                                        $gte:calendar.chosenWeekStart.toISOString()
-                                    }
-                                },{
-                                    startDate:{
-                                        $lte:calendar.chosenWeekEnd.toISOString()
-                                    }
-                                }
-                            ]
-                        },
-                        function(){
-                            //alert("Hola");
-                        },
-                        {
-                            startRow:0,
-                            endRow:0
-                        }
-                );                  
+                 dateStart=calendar.chosenWeekStart.toISOString();
+                 dateEnd=calendar.chosenWeekEnd.toISOString();
             }else if(calendar.getCurrentViewName()==="month")
             {
-                calendar.fetchData({
-                            $and:[
-                                {
-                                    startDate:{
-                                        $gte:calendar.monthView.data[0].date1.toISOString()
-                                    }
-                                },{
-                                    startDate:{
-                                        $lt:(new Date(new Date(calendar.monthView.data[calendar.monthView.data.length-1].date7.getTime()).setHours(24))).toISOString()
-                                    }
-                                }
-                            ]
-                        },
-                        function(){
-                            //alert("Hola");
-                        },
-                        {
-                            startRow:0,
-                            endRow:0
-                        }
-                );                    
+                 dateStart=calendar.monthView.data[0].date1.toISOString();
+                 dateEnd=(new Date(new Date(calendar.monthView.data[calendar.monthView.data.length-1].date7.getTime()).setHours(24))).toISOString();        
             }
+                        
+            calendar.fetchData(
+                 {
+                    $and:[
+                            {
+                                startDate:{
+                                    $gte:dateStart
+                                }
+                            },{
+                                startDate:{
+                                    $lt:dateEnd
+                                }
+                            }
+                        ]
+                },
+                function(){
+                    //alert("Hola");
+                },
+                {
+                    startRow:0,
+                    endRow:0
+                }
+            );             
+            
         }
         
         calendar.currentViewChanged=function(viewName){

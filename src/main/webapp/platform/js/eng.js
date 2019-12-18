@@ -2351,11 +2351,13 @@ var eng = {
                 Page.setEvent("load",function(){
                     //isc.Canvas.resizeFonts(3);                        
                 });
+                
                 var off=new Date().getTimezoneOffset()/-60;
                 Time.setDefaultDisplayTimezone((off<0?"-":"+")+(Math.abs(off)>9?Math.abs(off):"0")+Math.abs(off)+":00");
                 Time.adjustForDST=false;
                 NumberUtil.decimalSymbol=".";
-                NumberUtil.groupingSymbol=",";              
+                NumberUtil.groupingSymbol=",";    
+                Offline.explicitOffline=false;
             
                 eng.utils.loadJS(eng.contextPath + "/platform/js/eng_lang.min.js",false,cache,true, eng.staticVersion);
                 

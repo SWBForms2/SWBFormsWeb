@@ -115,7 +115,7 @@ eng.fieldProcesors["select"] = function(field)
         base.editorProperties.textMatchStyle=base.textMatchStyle;  
     }else if(!base.editorProperties.textMatchStyle)
     {
-        base.editorProperties.textMatchStyle="substring";
+        base.editorProperties.textMatchStyle="exact";
     }    
         
     if(base.getFilterCriteria)

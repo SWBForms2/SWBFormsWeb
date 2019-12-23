@@ -590,7 +590,6 @@ eng.dataSources["Page"] = {
         }},
         {name: "formExtProps", title: "Propiedades Extendidas de la Forma", stype: "grid", canReorderRecords:true, dataSource:"PageProps"},
         {name: "formAddiJS", title: "JScript Adicionales a la Forma", stype: "text"},
-        {name: "formProcessor", title: "Form Processor", hint:"function(request, dataSource, action, eng, path){\n    //Your server code...\n    return request;\n}", showHintInField:"true", stype: "text"},
         
         {name: "process", title: "Proceso", stype: "select", dataSource:"SWBF_Process", changed:function(form,item,value){
             this.form.clearValue('gridProps');

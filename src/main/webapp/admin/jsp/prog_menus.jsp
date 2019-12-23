@@ -298,7 +298,6 @@
                         }, 
                     },
                     {name: "formAddiJS", showIf:"form.hasType(['sc_grid_detail','sc_form','process','sc_search_detail','sc_fulltext_search_detail'])"},        
-                    {name: "formProcessor", showIf:"form.hasType(['sc_grid_detail','sc_form','process','sc_search_detail','sc_fulltext_search_detail'])"},        
                     
                     {name: "contextBox", width:"100%"},
                     {name: "helpBox", width:"100%", showIf:"form.hasType(['detail'])"},

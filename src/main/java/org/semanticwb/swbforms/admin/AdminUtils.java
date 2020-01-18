@@ -345,7 +345,7 @@ public class AdminUtils {
                                     String dsn = dataSource.substring(dataSource.lastIndexOf(":") + 1);
 
                                     ret = new StringBuilder();
-                                    ret.append("eng.dataSourceIndexes[\"swbf_" + dsn + "_" + name + "\"] = {" + "\n");
+                                    ret.append("eng.dataSourceIndexes[\"" + name + "\"] = {" + "\n");
                                     ret.append("    dataSource: \"" + dsn + "\"," + "\n");
                                     ret.append("    scriptEngine: \"/admin/ds/datasources.js\"," + "\n");
 

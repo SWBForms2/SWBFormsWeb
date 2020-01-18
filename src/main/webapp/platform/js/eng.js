@@ -1544,37 +1544,43 @@ var eng = {
     //Transforma un stype en propiedades nativas del field
     processField: function(field)
     {
-        var stype=field.stype;
-        if(stype)
+        if(field)
         {
-            if(eng.fieldProcesors[stype])
+            var stype=field.stype;
+            if(stype)
             {
-                   return eng.fieldProcesors[stype](field);
-            }else
-            {
-                return field;
-            }
-        }else return field;
+                if(eng.fieldProcesors[stype])
+                {
+                       return eng.fieldProcesors[stype](field);
+                }else
+                {
+                    return field;
+                }
+            }else return field;
+        }
     },
             
     //Transforma un stype en propiedades nativas del validators        
     processValidator: function(validator)
     {
-        var stype=validator.stype;
-        if(stype)
+        if(validator)
         {
-            var base=eng.validators[stype];
-            if(base)
+            var stype=validator.stype;
+            if(stype)
             {
-                var ret=eng.utils.clonAndMergeObjects(base,validator);
-                eng.utils.removeAttribute(ret,"stype");
-                //console.log(validator);
-                //console.log(base);
-                //console.log(ret);                
-                return ret;
+                var base=eng.validators[stype];
+                if(base)
+                {
+                    var ret=eng.utils.clonAndMergeObjects(base,validator);
+                    eng.utils.removeAttribute(ret,"stype");
+                    //console.log(validator);
+                    //console.log(base);
+                    //console.log(ret);                
+                    return ret;
+                }
             }
+            return validator;
         }
-        return validator;
     },
         
 /*    

@@ -125,9 +125,10 @@
                 <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
-                <li><a href="prog_impJSON" data-history="#prog_impJSON" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>Import JSON Data</a></li>
                 <li><a href="prog_export" data-history="#prog_export" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>Export Data</a></li>
+                <li><a href="prog_import" data-history="#prog_import" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>Import Data</a></li>
                 <li><a href="JDBCImporter?ajax=true" data-history="#JDBCImporter" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>JDBC Importer</a></li>
+                <li><a href="prog_indexMgr" data-history="#prog_export" data-target=".content-wrapper" data-load="ajax"><i class="fa fa-gear"></i>Index Manager</a></li>
             </ul>                                
             <a href="#">
                 <i class="fa fa-wrench"></i>

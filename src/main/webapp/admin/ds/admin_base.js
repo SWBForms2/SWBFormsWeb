@@ -254,6 +254,8 @@ eng.dataServices["DataSourceIndexService"] = {
         {
             this.getDataSource("DataSourceIndexFields").removeObj(it.next());
         }
+        
+        this.getDataSource(request.data.ds.substring(request.data.ds.lastIndexOf(":")+1)).dropIndex(request.data.name);
     }
 };
 

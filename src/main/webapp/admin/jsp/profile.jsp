@@ -64,7 +64,7 @@
                 </ul>
                 <div class="tab-content">
                     <div class="active tab-pane" id="settings">
-                        <form class="form-horizontal" method="post" action="/admin/profile" data-target=".content-wrapper" data-submit="ajax" role="form">
+                        <form class="form-horizontal" method="post" action="<%=contextPath%>/admin/profile" data-target=".content-wrapper" data-submit="ajax" role="form">
                             <div class="form-group">
                                 <label for="fullname" class="col-sm-4 control-label">Nombre completo</label>
                                 <div class="col-sm-8">

@@ -364,10 +364,31 @@
     {
 %>
 <section id="content" style="padding: 7px">  
+<%
+        if(type.equals("ajax_content"))
+        {
+%>    
+    <script type="text/javascript">
+        loadContent("<%=_path%>","#content");
+    </script>            
+<%
+        }else if("process_tray".equals(type))
+        {
+%>
+    <script type="text/javascript">
+        loadContent("admin_process_tray?pid=<%=pid%><%=extp%>","#content");
+    </script>  
+<%
+        }else
+        {
+%>    
     <iframe class="ifram_content <%=pid%>" src="<%=_path%>" frameborder="0" width="100%"></iframe>
     <script type="text/javascript">
         $(window).resize();
-    </script>                        
+    </script>  
+<%
+        }
+%>    
 </section>
 <%
     }else

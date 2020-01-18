@@ -51,6 +51,15 @@
             <version>7.0</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>closure-compiler</groupId>
+            <artifactId>closure-compiler-v20190929</artifactId>
+            <version>v20190929</version>
+            <scope>system</scope>
+            <systemPath>
+              ${basedir}/lib/closure-compiler-v20190929.jar
+            </systemPath>
+        </dependency>       
     </dependencies>
 
     <build>
@@ -87,6 +96,22 @@
                             </resources>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy-lib</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/SWBFormsWeb-${project.version}/WEB-INF/lib</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/lib</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>                    
                 </executions>
             </plugin>            
             <plugin>

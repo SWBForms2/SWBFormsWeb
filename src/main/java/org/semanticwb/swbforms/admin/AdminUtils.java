@@ -83,6 +83,7 @@ public class AdminUtils {
                 + "    validators:{},\n"
                 + "    dataServices:{},\n"
                 + "    dataProcessors:{},\n"
+                + "    formProcessors:{},\n"
                 + "    dataExtractors:{},\n"
                 + "    fileSources:{},\n"
                 + "    routes:{},\n"

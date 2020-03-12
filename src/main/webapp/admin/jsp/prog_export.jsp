@@ -96,7 +96,7 @@
                     <b>App DataSources:</b>
                     <select id="dsd" name="dsd" class="form-control" multiple>
 <%
-    for(Object name:set)
+    for(String name:set)
     {
 %>                        
                         <option value="<%=name%>"><%=name%></option>

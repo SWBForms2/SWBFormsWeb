@@ -211,18 +211,18 @@ eng.dataProcessors["DefPropertiesProcessor"] = {
                 
                 //if field type == "sequence"
                 fs = ds.findScriptFields("stype", "id");
-                if(fs.size()==1  && request.data["_id"]===null)
+                if(fs.size()==1  && request.data["_id"]==null)
                 {
                     request.data["_id"] = ds.getBaseUri() + request.data[fs[0].getString("name")];
                 }                
                 
                 //if properti name == "id"
-                if(request.data["id"]!==null && request.data["_id"]===null)
+                if(request.data["id"]!=null && request.data["_id"]==null)
                 {
                     request.data["_id"] = ds.getBaseUri() + request.data["id"];
                 }
 
-                if (ds.findScriptFields("name","created") !== null)
+                if (ds.findScriptFields("name","created") != null)
                 {
                     request.data.created = new Date().toISOString();
                     if (this.user)
@@ -232,7 +232,7 @@ eng.dataProcessors["DefPropertiesProcessor"] = {
                 }
             } else if (action === "update")
             {
-                if (ds.findScriptFields("name","updated") !== null)
+                if (ds.findScriptFields("name","updated") != null)
                 {
                     request.data.updated = new Date().toISOString();
                     if (this.user)
@@ -270,7 +270,7 @@ eng.dataProcessors["DefPropertiesProcessor"] = {
                     }
                 }                
             }
-            if (request.data._swbf_processAction !== null)
+            if (request.data._swbf_processAction != null)
             {
                 var err=this.getProcessMgr().processAction(this,request.data,trxParams);
                 if(err!=null)throw err;

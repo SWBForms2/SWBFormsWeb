@@ -239,7 +239,7 @@
                 title: "Regresar",
                 padding: "10px",
                 click: function (p1) {
-                    parent.loadContent("admin_content?pid=<%=pid%>",".content-wrapper");
+                    parent.loadContent("admin_content?p=<%=pid%>",".content-wrapper");
                     return false;
                 }
             }));
